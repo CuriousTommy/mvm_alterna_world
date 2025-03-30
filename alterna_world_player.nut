@@ -5,7 +5,8 @@ const ATTRIBUTE_DURATION_FOREVER = -1;
 
 IncludeScript("alterna_world_misc.nut");
 
-function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player, /*String*/ player_name) {
+function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player) {
+    local player_name = NetProps.GetPropString(self, "m_szNetname");
     DebugPrintToConsole(format("Applying default attributes to %s", player_name));
 
     // Increase Max health for debugging

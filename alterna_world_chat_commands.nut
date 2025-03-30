@@ -9,7 +9,6 @@ class ChatCommandManager {
 
     function ProcessCommand(/*CTFPlayer*/ player, /*String*/ chat_msg) {
         local player_name = NetProps.GetPropString(player, "m_szNetname");
-        local player_steam_id = NetProps.GetPropString(player, "m_szNetworkIDString");
 
         if (chat_msg.slice(0,1) == "!") {
             DebugPrintToConsole(format("Player %s is initiating a command!", player_name))
@@ -22,11 +21,15 @@ class ChatCommandManager {
 
             switch (command_args[0]) {
                 case "chips":
-                    ListChips(player, player_steam_id);
+                    ListChips(player);
                     return;
 
                 case "debugaddchip":
-                    AddChip(player, player_steam_id, command_args);
+                    AddChip(player, command_args);
+                    return;
+
+                case "debugmaxoutallchips":
+                    MaxOutAllChips(player);
                     return;
 
                 default:
@@ -36,10 +39,11 @@ class ChatCommandManager {
         }
     }
 
-    function ListChips(/*CTFPlayer*/ player, /*String*/ player_steam_id) {
-        local player_chips_table =  global_values.player_inventory_table[player_steam_id]["chips"];
+    function ListChips(/*CTFPlayer*/ player) {
+        local player_inventory = global_values.GetPlayerInventory(player);
+        local chip_cache = player_inventory.GetCachedChips(player);
 
-        foreach (chip in player_chips_table) {
+        foreach (chip in chip_cache) {
             local chip_description = chip.GetChipDescription();
             local chip_collected = chip.chip_count;
             local chip_max = chip.max_chips;
@@ -48,25 +52,39 @@ class ChatCommandManager {
         }
     }
 
-    function AddChip(/*CTFPlayer*/ player, /*String*/ player_steam_id, /*List<String>*/ command_args) {
+    function AddChip(/*CTFPlayer*/ player, /*List<String>*/ command_args) {
         if (command_args.len() < 2) {
             PrintToChatWindow(player, "Not enough arguments for !debugaddchip");
             PrintToChatWindow(player, "!debugaddchip <internal_chip_name>");
             return;
         }
 
-        local player_chips_table =  global_values.player_inventory_table[player_steam_id]["chips"];
+        local player_inventory = global_values.GetPlayerInventory(player);
+        local chip_cache = player_inventory.GetCachedChips(player);
+
         local internal_chip_name = command_args[1];
-        if (!(internal_chip_name in player_chips_table)) {
+        if (!(internal_chip_name in chip_cache)) {
             PrintToChatWindow(player, format("Unable to find requested chip: '%s'", internal_chip_name));
         }
 
-        local chip = player_chips_table[internal_chip_name];
+        local chip = chip_cache[internal_chip_name];
         chip.IncrementChip();
 
-        // Force game to reload weapon for current player
-        local player_manager = Entities.FindByClassname(null, "tf_player_manager");
-        local uid =  NetProps.GetPropIntArray(player_manager, "m_iUserID", player.entindex());
-        SendGlobalGameEvent("post_inventory_application", { userid = uid });
+        // Recreate weapon and apply chip upgrades to weapons/player
+        player_inventory.ReapplyWeaponsToPlayer(player);
+        player_inventory.ApplyChipsUpgradesToPlayer(player);
+    }
+
+    function MaxOutAllChips(/*CTFPlayer*/ player) {
+        local player_inventory = global_values.GetPlayerInventory(player);
+        local chip_cache = player_inventory.GetCachedChips(player);
+
+        foreach (chip in chip_cache) {
+            chip.DebugMaxOutChips();
+        }
+
+        // Recreate weapon and apply chip upgrades to weapons/player
+        player_inventory.ReapplyWeaponsToPlayer(player);
+        player_inventory.ApplyChipsUpgradesToPlayer(player);
     }
 }

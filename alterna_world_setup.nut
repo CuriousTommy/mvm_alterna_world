@@ -18,37 +18,33 @@ IncludeScript("alterna_world_chat_commands.nut");
 IncludeScript("alterna_world_chip.nut");
 IncludeScript("alterna_world_misc.nut");
 IncludeScript("alterna_world_player.nut");
+IncludeScript("alterna_world_playerinventory.nut");
 IncludeScript("alterna_world_weapon.nut");
 
 // Initalize global variables
 
 chat_command_manager <- ChatCommandManager(this);
-shared_chip_table <- SetupSharedChip();
+shared_chip_table <- CreateSharedTeamChip(Convars.GetInt("tf_mvm_defenders_team_size"));
 player_inventory_table <- {};
 
-const PLAYER_INVENTORY_KEY_CHIPS = "chips";
+function GetPlayerInventory(/*CTFPlayer*/ player) {
+    local steam_id = NetProps.GetPropString(player, "m_szNetworkIDString");
 
-function InitPlayerInventory(/*CTFPlayer*/ player, /*String*/ name, /*String*/ steam_id) {
-    if (steam_id in player_inventory_table) {
-        return;
+    if (!(steam_id in player_inventory_table)) {
+        local name = NetProps.GetPropString(player, "m_szNetname");
+        DebugPrintToConsole(format("Initalizing player inventory for %s (%s)", steam_id, name));
+        player_inventory_table[steam_id] <- PlayerInventory(player, shared_chip_table);
     }
 
-    DebugPrintToConsole(format("Initalizing player inventory for %s (%s)", steam_id, name));
-    local player_inventory = {
-        "chips": SetupPlayerChip(shared_chip_table, player)
-    };
-
-    player_inventory_table[steam_id] <- player_inventory;
+    return player_inventory_table[steam_id];
 }
 
 ::PostPlayerSpawn <- function()
 {
-    if (!self.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
-        local player_steam_id = NetProps.GetPropString(self, "m_szNetworkIDString");
-        local player_name = NetProps.GetPropString(self, "m_szNetname");
+    ApplyDefaultPlayerAttributes(self);
 
-        ApplyDefaultPlayerAttributes(self, player_name);
-    }
+    local player_inventory = GetPlayerInventory(self);
+    player_inventory.ApplyChipsUpgradesToPlayer(self);
 }
 
 // See following for more details on the events and it's params:
@@ -58,53 +54,40 @@ CollectEventsInScope
 ({
 	OnGameEvent_post_inventory_application = function(params)
 	{
-		local cbaseplayer = GetPlayerFromUserID(params.userid)
+		local player = GetPlayerFromUserID(params.userid)
 
-        if (cbaseplayer instanceof CTFPlayer && !cbaseplayer.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
-            local player_name = NetProps.GetPropString(cbaseplayer, "m_szNetname");
-            local player_steam_id = NetProps.GetPropString(cbaseplayer, "m_szNetworkIDString");
+        if (player instanceof CTFPlayer && !player.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
+            local player_name = NetProps.GetPropString(player, "m_szNetname");
+            local player_inventory = GetPlayerInventory(player);
 
             DebugPrintToConsole(format("Found non-AI player %s", player_name));
-
-            RemoveAllWeapons(cbaseplayer);
-            AssignApprovedWeapons(cbaseplayer);
-
-            // Initialize player specific data
-            InitPlayerInventory(cbaseplayer, player_name, player_steam_id);
-            local player_inventory = player_inventory_table[player_steam_id][PLAYER_INVENTORY_KEY_CHIPS];
-
-            ApplyChipUpgradeToWeapon(cbaseplayer, player_name, player_inventory);
+            player_inventory.ReapplyWeaponsToPlayer(player);
         }
 	}
 
     OnGameEvent_player_say = function(params)
     {
-        local cbaseplayer = GetPlayerFromUserID(params.userid)
+        local player = GetPlayerFromUserID(params.userid)
         local chat_msg = params.text;
-        chat_command_manager.ProcessCommand(cbaseplayer, chat_msg);
+        chat_command_manager.ProcessCommand(player, chat_msg);
     }
 
     OnGameEvent_player_spawn = function(params)
     {
-        local cbaseplayer = GetPlayerFromUserID(params.userid)
+        local player = GetPlayerFromUserID(params.userid)
 
-        if (cbaseplayer instanceof CTFPlayer && !cbaseplayer.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
+        if (player != null && player instanceof CTFPlayer && !player.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
             // There are scenarios where SteamID3 is not yet available. This forces it to be available.
             // https://developer.valvesoftware.com/wiki/Source_SDK_Base_2013/Scripting/VScript_Examples#Fetching_player_name_or_Steam_ID
-            if (cbaseplayer.GetTeam() == 0) {
+            if (player.GetTeam() == 0) {
                 SendGlobalGameEvent("player_activate", {userid = params.userid})
             }
 
-            // Initialize player specific data
-            local player_name = NetProps.GetPropString(cbaseplayer, "m_szNetname");
-            local player_steam_id = NetProps.GetPropString(cbaseplayer, "m_szNetworkIDString");
-            InitPlayerInventory(cbaseplayer, player_name, player_steam_id);
-
             // Workaround for applying attributes to player
             // https://developer.valvesoftware.com/wiki/Team_Fortress_2/Scripting/VScript_Examples#Adding_attributes_to_player_on_spawn
-            if (cbaseplayer != null && params.team != 0)
+            if (params.team != 0)
             {
-                EntFireByHandle(cbaseplayer, "CallScriptFunction", "PostPlayerSpawn", 0, null, null)
+                EntFireByHandle(player, "CallScriptFunction", "PostPlayerSpawn", 0, null, null)
             }
         }
     }
