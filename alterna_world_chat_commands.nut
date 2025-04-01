@@ -25,11 +25,11 @@ class ChatCommandManager {
                     return;
 
                 case "debugaddchip":
-                    AddChip(player, command_args);
+                    DebugAddChip(player, command_args);
                     return;
 
                 case "debugmaxoutallchips":
-                    MaxOutAllChips(player);
+                    DebugMaxOutAllChips(player);
                     return;
 
                 default:
@@ -37,6 +37,10 @@ class ChatCommandManager {
                     return;
             }
         }
+    }
+
+    function IsCheatingEnabled() {
+        return Convars.GetInt("sv_cheats") == 1;
     }
 
     function ListChips(/*CTFPlayer*/ player) {
@@ -52,10 +56,15 @@ class ChatCommandManager {
         }
     }
 
-    function AddChip(/*CTFPlayer*/ player, /*List<String>*/ command_args) {
+    function DebugAddChip(/*CTFPlayer*/ player, /*List<String>*/ command_args) {
         if (command_args.len() < 2) {
             PrintToChatWindow(player, "Not enough arguments for !debugaddchip");
             PrintToChatWindow(player, "!debugaddchip <internal_chip_name>");
+            return;
+        }
+
+        if (!IsCheatingEnabled()) {
+            PrintToChatWindow(player, "sv_cheats must be set to 1 to use this command");
             return;
         }
 
@@ -75,7 +84,12 @@ class ChatCommandManager {
         player_inventory.ApplyChipsUpgradesToPlayer(player);
     }
 
-    function MaxOutAllChips(/*CTFPlayer*/ player) {
+    function DebugMaxOutAllChips(/*CTFPlayer*/ player) {
+        if (!IsCheatingEnabled()) {
+            PrintToChatWindow(player, "sv_cheats must be set to 1 to use this command");
+            return;
+        }
+
         local player_inventory = global_values.GetPlayerInventory(player);
         local chip_cache = player_inventory.GetCachedChips(player);
 
