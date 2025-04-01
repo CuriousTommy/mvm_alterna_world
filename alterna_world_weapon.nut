@@ -2,6 +2,115 @@
 
 IncludeScript("alterna_world_misc.nut");
 
+class CustomLoadout {
+    primary_weapon = null;
+    secondary_weapon = null;
+    pda1_weapon = null;
+    pda2_weapon = null;
+    build_weapon = null;
+    melee_weapon = null;
+
+    constructor(primary_weapon, secondary_weapon,
+        pda1_weapon, pda2_weapon, build_weapon,
+        melee_weapon
+    ) {
+        this.primary_weapon = primary_weapon;
+        this.secondary_weapon = secondary_weapon;
+        this.pda1_weapon = pda1_weapon;
+        this.pda2_weapon = pda2_weapon;
+        this.build_weapon = build_weapon;
+        this.melee_weapon = melee_weapon;
+    }
+
+    function ApplyWeaponsToPlayer(/*CTFPlayer*/ player) {
+        if (primary_weapon != null) {
+            primary_weapon.SetTeam(player.GetTeam())
+            primary_weapon.DispatchSpawn();
+            player.Weapon_Equip(primary_weapon);
+        }
+
+        if (secondary_weapon != null) {
+            secondary_weapon.SetTeam(player.GetTeam())
+            secondary_weapon.DispatchSpawn();
+            player.Weapon_Equip(secondary_weapon);
+        }
+
+        if (pda1_weapon != null) {
+            pda1_weapon.SetTeam(player.GetTeam())
+            pda1_weapon.DispatchSpawn();
+            player.Weapon_Equip(pda1_weapon);
+        }
+
+        if (pda2_weapon != null) {
+            pda2_weapon.SetTeam(player.GetTeam())
+            pda2_weapon.DispatchSpawn();
+            player.Weapon_Equip(pda2_weapon);
+        }
+
+        if (build_weapon != null) {
+            build_weapon.SetTeam(player.GetTeam())
+            build_weapon.DispatchSpawn();
+            player.Weapon_Equip(build_weapon);
+        }
+
+        if (melee_weapon != null) {
+            melee_weapon.SetTeam(player.GetTeam())
+            melee_weapon.DispatchSpawn();
+            player.Weapon_Equip(melee_weapon);
+        }
+    }
+
+    function SwitchToPrimarySecondaryOrMelee(/*CTFPlayer*/ player) {
+        if (primary_weapon != null) {
+            player.Weapon_Switch(primary_weapon);
+        } else if (secondary_weapon != null) {
+            player.Weapon_Switch(secondary_weapon);
+        } else if (melee_weapon != null) {
+            player.Weapon_Switch(melee_weapon);
+        }
+
+        // Otherwise do nothing
+    }
+
+    function ApplyChipUpgradeToWeapons(/*ChipManager*/ chip) {
+        if (primary_weapon != null) {
+            chip.ApplyAttributeToWeapon(primary_weapon);
+        }
+
+        if (secondary_weapon != null) {
+            chip.ApplyAttributeToWeapon(secondary_weapon);
+        }
+
+        if (pda1_weapon != null) {
+            chip.ApplyAttributeToWeapon(pda1_weapon);
+        }
+
+        if (pda2_weapon != null) {
+            chip.ApplyAttributeToWeapon(pda2_weapon);
+        }
+
+        if (build_weapon != null) {
+            chip.ApplyAttributeToWeapon(build_weapon);
+        }
+
+        if (melee_weapon != null) {
+            chip.ApplyAttributeToWeapon(melee_weapon);
+        }
+    }
+}
+
+function CreateCustomLoadoutPrimaryAndMelee(primary_weapon, melee_weapon) /*-> CustomLoadout*/ {
+    return CustomLoadout(
+        primary_weapon, null, null, null, null, melee_weapon
+    );
+}
+
+function CreateCustomLoadoutSecondaryAndMelee(secondary_weapon, melee_weapon) /*-> CustomLoadout*/ {
+    return CustomLoadout(
+        null, secondary_weapon, null, null, null, melee_weapon
+    );
+}
+
 // The max number of weapons that can be equipped in TF2
 const TF2_MAX_WEAPONS = 8;
 
@@ -21,7 +130,7 @@ function RemoveAllWeapons(/*CBasePlayer*/ cbaseplayer) {
 }
 
 // Create any weapon that is provided in the arguments
-function Private_CreateWeaponGeneric(/*String*/ weapon_classname, /*Integer*/ weapon_def_id) {
+function CreateWeaponGeneric(/*String*/ weapon_classname, /*Integer*/ weapon_def_id) {
     local weapon = Entities.CreateByClassname(weapon_classname);
     NetProps.SetPropInt(weapon, "m_AttributeManager.m_Item.m_iItemDefinitionIndex", weapon_def_id);
     NetProps.SetPropBool(weapon, "m_AttributeManager.m_Item.m_bInitialized", true)
@@ -61,14 +170,14 @@ function Private_CreateWeaponTfWeaponBuilder(/*String*/ weapon_classname, /*Inte
 // Weapon IDs:
 // https://wiki.alliedmods.net/Team_fortress_2_item_definition_indexes
 
-function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*/ {
+function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*/ {
 
 
     local scout_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_scattergun", 13),
-            Private_CreateWeaponGeneric("tf_weapon_bat", 0)
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_scattergun", 13),
+            CreateWeaponGeneric("tf_weapon_bat", 0)
+        );
     }
     local approved_scout_loadouts = [
         scout_loadout_default
@@ -76,10 +185,10 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local solider_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_rocketlauncher", 18)
-            Private_CreateWeaponGeneric("tf_weapon_shovel", 6)
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_rocketlauncher", 18),
+            CreateWeaponGeneric("tf_weapon_shovel", 6)
+        );
     }
     local approved_solider_loadouts = [
         solider_loadout_default
@@ -87,16 +196,16 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local pyro_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_flamethrower", 21)
-            Private_CreateWeaponGeneric("tf_weapon_fireaxe", 2)
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_flamethrower", 21)
+            CreateWeaponGeneric("tf_weapon_fireaxe", 2)
+        );
     }
     local pyro_loadout_dragonsfury = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_rocketlauncher_fireball", 1178)
-            Private_CreateWeaponGeneric("tf_weapon_fireaxe", 2)
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_rocketlauncher_fireball", 1178)
+            CreateWeaponGeneric("tf_weapon_fireaxe", 2)
+        );
     }
     local approved_pyro_loadouts = [
         pyro_loadout_default,
@@ -105,16 +214,16 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local demoman_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_grenadelauncher", 19),
-            Private_CreateWeaponGeneric("tf_weapon_bottle", 1)
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_grenadelauncher", 19),
+            CreateWeaponGeneric("tf_weapon_bottle", 1)
+        );
     }
     local demoman_loadout_stickybomb = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_pipebomblauncher", 20),
-            Private_CreateWeaponGeneric("tf_weapon_bottle", 1)
-        ];
+        CreateCustomLoadoutSecondaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_pipebomblauncher", 20),
+            CreateWeaponGeneric("tf_weapon_bottle", 1)
+        );
     }
     local approved_demoman_loadouts = [
         demoman_loadout_default,
@@ -123,10 +232,10 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local heavy_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_minigun", 15),
-            Private_CreateWeaponGeneric("tf_weapon_fists", 5)
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_minigun", 15),
+            CreateWeaponGeneric("tf_weapon_fists", 5)
+        );
     }
     local approved_heavy_loadouts = [
         heavy_loadout_default
@@ -134,13 +243,14 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local engineer_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_shotgun_primary", 9),
-            Private_CreateWeaponGeneric("tf_weapon_pda_engineer_build", 25),
-            Private_CreateWeaponGeneric("tf_weapon_pda_engineer_destroy", 26),
+        return CustomLoadout(
+            CreateWeaponGeneric("tf_weapon_shotgun_primary", 9),
+            null,
+            CreateWeaponGeneric("tf_weapon_pda_engineer_build", 25),
+            CreateWeaponGeneric("tf_weapon_pda_engineer_destroy", 26),
             Private_CreateWeaponTfWeaponBuilder("tf_weapon_builder", 28, Constants.ETFClass.TF_CLASS_ENGINEER),
-            Private_CreateWeaponGeneric("tf_weapon_wrench", 7)
-        ];
+            CreateWeaponGeneric("tf_weapon_wrench", 7)
+        );
     }
     local approved_engineer_loadouts = [
         engineer_loadout_default
@@ -148,16 +258,16 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local medic_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_syringegun_medic", 17),
-            Private_CreateWeaponGeneric("tf_weapon_bonesaw", 8),
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_syringegun_medic", 17),
+            CreateWeaponGeneric("tf_weapon_bonesaw", 8)
+        );
     }
     local medic_loadout_crossbow = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_crossbow", 305),
-            Private_CreateWeaponGeneric("tf_weapon_bonesaw", 8),
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_crossbow", 305),
+            CreateWeaponGeneric("tf_weapon_bonesaw", 8)
+        );
     }
     local approved_medic_loadouts = [
         medic_loadout_default,
@@ -166,10 +276,10 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local sniper_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_sniperrifle", 14),
-            Private_CreateWeaponGeneric("tf_weapon_club", 3),
-        ];
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_sniperrifle", 14),
+            CreateWeaponGeneric("tf_weapon_club", 3)
+        );
     }
     local approved_sniper_loadouts = [
         sniper_loadout_default
@@ -177,11 +287,14 @@ function GenerateApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Function>>*
 
 
     local spy_loadout_default = function() {
-        return [
-            Private_CreateWeaponGeneric("tf_weapon_revolver", 24),
-            Private_CreateWeaponGeneric("tf_weapon_invis", 30),
-            Private_CreateWeaponGeneric("tf_weapon_knife", 4),
-        ];
+        return CustomLoadout(
+            null,
+            CreateWeaponGeneric("tf_weapon_revolver", 24),
+            null,
+            CreateWeaponGeneric("tf_weapon_invis", 30),
+            null,
+            CreateWeaponGeneric("tf_weapon_knife", 4)
+        );
     }
     local approved_spy_loadouts = [
         spy_loadout_default

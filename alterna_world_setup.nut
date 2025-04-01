@@ -15,6 +15,8 @@ function CollectEventsInScope(events)
 }
 
 IncludeScript("alterna_world_chat_commands.nut");
+IncludeScript("alterna_world_chip_logic.nut");
+IncludeScript("alterna_world_chip_organiser.nut");
 IncludeScript("alterna_world_chip.nut");
 IncludeScript("alterna_world_misc.nut");
 IncludeScript("alterna_world_player.nut");

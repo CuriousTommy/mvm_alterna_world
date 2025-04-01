@@ -26,7 +26,7 @@ class PlayerInventory {
         this.player_chips = CreatePlayerChip();
         ForceUpdateCachedChips(player);
 
-        this.player_weapons = GenerateApprovedWeapons();
+        this.player_weapons = GenerateDefaultApprovedWeapons();
         this.player_selected_weapon_loadout = 0;
     }
 
@@ -74,37 +74,27 @@ class PlayerInventory {
         return weapon_loadout_list[player_selected_weapon_loadout]();
     }
 
-    // All classes will be forced to their stock weapons
     function ReapplyWeaponsToPlayer(/*CTFPlayer*/ player) {
+        local cached_chips = GetCachedChips(player);
+
         // Remove all existing weapons attached to the player
         RemoveAllWeapons(player);
 
-        // Create and apply a weapon loadout to the player
+        // Create default weapon loadout for player
         local weapon_loadout = Private_GetSelectedWeaponLoadout(player);
-        foreach (weapon in weapon_loadout) {
-            DebugPrintToConsole(format("Equiping weapon %s", weapon.GetClassname()));
 
-            weapon.SetTeam(player.GetTeam())
-            weapon.DispatchSpawn();
-
-            player.Weapon_Equip(weapon);
+        // Let chips overwrite default loadout
+        foreach (chips in cached_chips) {
+            chips.ReplaceWeaponInCustomLoadout(weapon_loadout);
         }
 
-        // Always switch to the first weapon in the list (if it is not empty)
-        if (weapon_loadout.len() > 0) {
-            player.Weapon_Switch(weapon_loadout[0]);
-        }
+        // Apply & switch to weapon loadout
+        weapon_loadout.ApplyWeaponsToPlayer(player);
+        weapon_loadout.SwitchToPrimarySecondaryOrMelee(player);
 
-        // Apply chip upgrades to the weapon
-        Private_ApplyChipsUpgradesToWeapons(player, weapon_loadout);
-    }
-
-    function Private_ApplyChipsUpgradesToWeapons( /*CTFPlayer*/ player, /*List<>*/ weapon_loadout) {
-        local cached_chips = GetCachedChips(player);
+        // Apply chip upgrades to weapon
         foreach (chip in cached_chips) {
-            foreach (weapon in weapon_loadout) {
-                chip.ApplyAttributeToWeapon(weapon);
-            }
+            weapon_loadout.ApplyChipUpgradeToWeapons(chip);
         }
     }
 
