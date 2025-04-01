@@ -3,5 +3,5 @@ function DebugPrintToConsole(/*String*/ msg) {
 }
 
 function PrintToChatWindow(/*CBasePlayer*/ player, /*String*/ msg) {
-    ClientPrint(null, Constants.EHudNotify.HUD_PRINTTALK, msg);
+    ClientPrint(player, Constants.EHudNotify.HUD_PRINTTALK, msg);
 }
