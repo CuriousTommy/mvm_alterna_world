@@ -8,8 +8,9 @@ function Private_AssignChipToTable(/*Table<String,ChipManager>*/ chip_table, /*C
 function Private_CreateSharedChipForTeam(/*Integer*/ max_team_size) /*-> Table<String,ChipManager>*/ {
     local shared_chips_for_team = {}
 
-    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponDamagePrimarySecondary(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerMaxHealthUpgrade(max_team_size));
+    Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerAmmoMetalRegen(max_team_size));
+    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryDamageIncrease(max_team_size));
 
     return shared_chips_for_team;
 }
@@ -28,6 +29,8 @@ function CreateSharedTeamChip(/*Integer*/ max_team_size) /*-> Table<Constants.ET
 function CreatePlayerChip() /*-> Table<Constants.ETFClass,Table<String,ChipManager>>*/ {
     local scout_only_chips = {};
     Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponReplacementScoutSandman());
+    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeCauseBleeding());
+    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeCauseMarkForDeath());
 
     local solider_only_chips = {};
     local pyro_only_chips = {};
