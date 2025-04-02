@@ -301,15 +301,15 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
     ];
 
     local all_approved_weapons = {}
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_SCOUT] <- approved_scout_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_SOLDIER] <- approved_solider_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_PYRO] <- approved_pyro_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_DEMOMAN] <- approved_demoman_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_SCOUT]        <- approved_scout_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_SOLDIER]      <- approved_solider_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_PYRO]         <- approved_pyro_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_DEMOMAN]      <- approved_demoman_loadouts;
     all_approved_weapons[Constants.ETFClass.TF_CLASS_HEAVYWEAPONS] <- approved_heavy_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_ENGINEER] <- approved_engineer_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_MEDIC] <- approved_medic_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_SNIPER] <- approved_sniper_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_SPY] <- approved_spy_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_ENGINEER]     <- approved_engineer_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_MEDIC]        <- approved_medic_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_SNIPER]       <- approved_sniper_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_SPY]          <- approved_spy_loadouts;
 
     return all_approved_weapons;
 }

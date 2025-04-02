@@ -1,13 +1,18 @@
 
-function CollectEventsInScope(events)
+function CollectEventsInScope_AlternaWorld(events)
 {
-	local events_id = UniqueString()
+	local events_id = "alterna_world_events"
 	getroottable()[events_id] <- events
+
 	local events_table = getroottable()[events_id]
-	foreach (name, callback in events) events_table[name] = callback.bindenv(this)
-	local cleanup_user_func, cleanup_event = "OnGameEvent_scorestats_accumulated_update"
-    if (cleanup_event in events) cleanup_user_func = events[cleanup_event].bindenv(this)
-	events_table[cleanup_event] <- function(params)
+	foreach (name, callback in events)
+        events_table[name] = callback.bindenv(this)
+
+    local cleanup_user_func, cleanup_event = "OnGameEvent_scorestats_accumulated_update"
+    if (cleanup_event in events)
+        cleanup_user_func = events[cleanup_event].bindenv(this)
+
+    events_table[cleanup_event] <- function(params)
 	{
 		if (cleanup_user_func) cleanup_user_func(params)
 		delete getroottable()[events_id]
@@ -52,7 +57,7 @@ function GetPlayerInventory(/*CTFPlayer*/ player) {
 // See following for more details on the events and it's params:
 // https://developer.valvesoftware.com/wiki/Team_Fortress_2/Scripting/Game_Events
 
-CollectEventsInScope
+CollectEventsInScope_AlternaWorld
 ({
 	OnGameEvent_post_inventory_application = function(params)
 	{
