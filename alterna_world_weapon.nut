@@ -2,6 +2,15 @@
 
 IncludeScript("alterna_world_misc.nut");
 
+enum CustomLoadoutWeaponType {
+    PRIMARY,
+    SECONDARY,
+    PDA1,
+    PDA2,
+    BUILD,
+    MELEE
+}
+
 class CustomLoadout {
     primary_weapon = null;
     secondary_weapon = null;
@@ -74,27 +83,27 @@ class CustomLoadout {
 
     function ApplyChipUpgradeToWeapons(/*ChipManager*/ chip) {
         if (primary_weapon != null) {
-            chip.ApplyAttributeToWeapon(primary_weapon);
+            chip.ApplyAttributeToWeapon(primary_weapon, CustomLoadoutWeaponType.PRIMARY);
         }
 
         if (secondary_weapon != null) {
-            chip.ApplyAttributeToWeapon(secondary_weapon);
+            chip.ApplyAttributeToWeapon(secondary_weapon, CustomLoadoutWeaponType.SECONDARY);
         }
 
         if (pda1_weapon != null) {
-            chip.ApplyAttributeToWeapon(pda1_weapon);
+            chip.ApplyAttributeToWeapon(pda1_weapon, CustomLoadoutWeaponType.PDA1);
         }
 
         if (pda2_weapon != null) {
-            chip.ApplyAttributeToWeapon(pda2_weapon);
+            chip.ApplyAttributeToWeapon(pda2_weapon, CustomLoadoutWeaponType.PDA2);
         }
 
         if (build_weapon != null) {
-            chip.ApplyAttributeToWeapon(build_weapon);
+            chip.ApplyAttributeToWeapon(build_weapon, CustomLoadoutWeaponType.BUILD);
         }
 
         if (melee_weapon != null) {
-            chip.ApplyAttributeToWeapon(melee_weapon);
+            chip.ApplyAttributeToWeapon(melee_weapon, CustomLoadoutWeaponType.MELEE);
         }
     }
 }

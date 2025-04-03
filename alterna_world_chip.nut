@@ -20,7 +20,7 @@ class ChipManager {
     }
 
     // Method for subclass to overload
-    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon) {}
+    function ApplyAttributeToWeapon( /*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {}
 
     // Method for subclass to overload
     function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {}

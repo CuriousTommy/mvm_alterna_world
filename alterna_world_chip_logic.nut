@@ -12,7 +12,7 @@ const ATTRIBUTE_DURATION_FOREVER = -1;
 // Common Chips (Team Based)
 //
 
-class ChipManager_PlayerMaxHealthUpgrade extends TeamPenaltyChipManager {
+class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
     function GetInternalChipName() { return "player_max_health"; }
     function GetChipDescription()  { return "Increase the max health"; }
 
@@ -63,6 +63,40 @@ class ChipManager_PlayerAmmoMetalRegen extends TeamPenaltyChipManager {
     }
 }
 
+class ChipManager_PlayerMovementSpeed extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "player_movement_speed"; }
+    function GetChipDescription()  { return "Increase movement speed"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 3);
+    }
+
+    function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
+        switch (player.GetPlayerClass()) {
+            default:
+                player.AddCustomAttribute("move speed bonus", 1.0 + (0.3 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
+
+class ChipManager_PlayerJumpHeight extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "player_jump_height"; }
+    function GetChipDescription()  { return "Increase jump height"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 3);
+    }
+
+    function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
+        switch (player.GetPlayerClass()) {
+            default:
+                player.AddCustomAttribute("increased jump height", 1.0 + (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
+
 class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipManager {
     function GetInternalChipName() { return "weapon_primary_secondary_damage_increase"; }
     function GetChipDescription()  { return "Increase damage of primary/secondary weapon"; }
@@ -71,7 +105,7 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
         base.constructor(max_team_size, 5);
     }
 
-    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon) {
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             // case "tf_weapon_rocketlauncher":
@@ -88,9 +122,164 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
     }
 }
 
+class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_reload_speed"; }
+    function GetChipDescription()  { return "Increase reload speed of primary/secondary weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_scattergun":
+                weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_fire_speed"; }
+    function GetChipDescription()  { return "Increase fire speed of primary/secondary weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_scattergun":
+                weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_max_ammo"; }
+    function GetChipDescription()  { return "Increase max ammo of primary/secondary weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_scattergun":
+                weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_clip_size"; }
+    function GetChipDescription()  { return "Increase clip size of primary/secondary weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_scattergun":
+                weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeDamageIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_melee_damage_increase"; }
+    function GetChipDescription()  { return "Increase damage of melee weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_bat":
+            case "tf_weapon_bat_wood":
+                // Should I buff?
+                weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeAttackSpeedIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_melee_attack_speed_increase"; }
+    function GetChipDescription()  { return "Increase attack speed of melee weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 4);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (weapon_type == CustomLoadoutWeaponType.MELEE) {
+            weapon.AddAttribute("melee attack rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+        }
+    }
+}
+
+class ChipManager_PlayerAndWeaponHealthRestored extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "player_and_weapon_health_restored"; }
+    function GetChipDescription()  { return "Increase health restored by player/weapon"; }
+
+    constructor(/*Integer*/ max_team_size) {
+        base.constructor(max_team_size, 5);
+    }
+
+    function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
+        if (player.GetPlayerClass() != Constants.ETFClass.TF_CLASS_MEDIC) {
+            local health_regen_amount = 5 * CalculatePercentage();
+
+            local health_regen_minimum = 1;
+            if (health_regen_amount < health_regen_minimum) {
+                health_regen_amount = health_regen_minimum;
+            }
+
+            player.AddCustomAttribute("health regen", health_regen_amount, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon_type) {
+            case CustomLoadoutWeaponType.PRIMARY:
+            case CustomLoadoutWeaponType.SECONDARY:
+            case CustomLoadoutWeaponType.MELEE:
+                weapon.AddAttribute("heal on kill", (25 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER)
+                break;
+        }
+    }
+}
+
 //
 // Common Chips (Individual Based)
 //
+
+class ChipManager_WeaponPrimaryMinicritsFromBehind extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_minicrits_from_behind"; }
+    function GetChipDescription()  { return "Mini-crits enemies from behind when close it range"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count < 1) {
+            return;
+        }
+
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_scattergun":
+                weapon.AddAttribute("closerange backattack minicrits", 1, ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
 
 class ChipManager_WeaponMeleeCauseBleeding extends ChipManager {
     function GetInternalChipName() { return "weapon_melee_cause_bleeding"; }
@@ -100,7 +289,7 @@ class ChipManager_WeaponMeleeCauseBleeding extends ChipManager {
         base.constructor(3);
     }
 
-    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon) {
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
@@ -118,7 +307,7 @@ class ChipManager_WeaponMeleeCauseMarkForDeath extends ChipManager {
         base.constructor(1);
     }
 
-    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon) {
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (chip_count < 1) {
             return;
         }
@@ -154,7 +343,7 @@ class ChipManager_WeaponReplacementScoutSandman extends ChipManager {
         }
     }
 
-    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon) {
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (weapon.GetClassname() == "tf_weapon_bat_wood") {
             switch (chip_count) {
                 case 2:
@@ -166,6 +355,27 @@ class ChipManager_WeaponReplacementScoutSandman extends ChipManager {
                     weapon.AddAttribute("maxammo grenades1 increased", 5.0, -1);
                     break;
             }
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeApplyAtomizerEffect extends ChipManager {
+    function GetInternalChipName() { return "weapon_melee_apply_atomizer_effect"; }
+    function GetChipDescription()  { return "Apply Atomizer effect to Scout's melee"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count < 1) {
+            return;
+        }
+
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_bat":
+            case "tf_weapon_bat_wood":
+                weapon.AddAttribute("air dash count", 1, ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }

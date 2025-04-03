@@ -15,7 +15,6 @@ function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player) {
     // For specific classes
     switch (player.GetPlayerClass()) {
         case Constants.ETFClass.TF_CLASS_SCOUT:
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_SOLDIER:
@@ -25,22 +24,18 @@ function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player) {
 
         case Constants.ETFClass.TF_CLASS_PYRO:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_DEMOMAN:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_HEAVYWEAPONS:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_ENGINEER:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_MEDIC:
@@ -49,12 +44,10 @@ function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player) {
 
         case Constants.ETFClass.TF_CLASS_SNIPER:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_SPY:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         default:
