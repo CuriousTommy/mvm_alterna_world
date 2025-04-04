@@ -7,7 +7,7 @@ IncludeScript("alterna_world_misc.nut");
 
 // This is intended for attributes that will never be set by a chip
 function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player) {
-    local player_name = NetProps.GetPropString(self, "m_szNetname");
+    local player_name = NetProps.GetPropString(player, "m_szNetname");
     DebugPrintToConsole(format("Applying default attributes to %s", player_name));
 
     // For all classes
@@ -19,7 +19,6 @@ function ApplyDefaultPlayerAttributes(/*CTFPlayer*/ player) {
 
         case Constants.ETFClass.TF_CLASS_SOLDIER:
             player.AddCustomAttribute("parachute attribute", 1, ATTRIBUTE_DURATION_FOREVER);
-            player.AddCustomAttribute("health regen", 1, -1);
             break;
 
         case Constants.ETFClass.TF_CLASS_PYRO:

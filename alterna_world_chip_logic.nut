@@ -4,9 +4,35 @@
 // https://wiki.teamfortress.com/wiki/List_of_item_attributes
 
 IncludeScript("alterna_world_chip.nut");
+IncludeScript("alterna_world_misc.nut")
 IncludeScript("alterna_world_weapon.nut");
 
 const ATTRIBUTE_DURATION_FOREVER = -1;
+
+//
+// Debug/Proof Of Concept Chip
+// Intended for testing out PoC upgrades on a player/weapon
+//
+class ChipManager_DebugApplyProofOfConcept extends ChipManager {
+    function GetInternalChipName() { return "debug_apply_proof_of_concept"; }
+    function GetChipDescription()  { return "Debug chip (Should not be included in final release)"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ReplaceWeaponInCustomLoadout(/*CustomLoadout*/ loadout) {
+        DebugPrintToConsole("[Debug Chip] ReplaceWeaponInCustomLoadout Called");
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        DebugPrintToConsole("[Debug Chip] ApplyAttributeToWeapon Called");
+    }
+
+    function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
+        DebugPrintToConsole("[Debug Chip] ApplyAttributeToPlayer Called");
+    }
+}
 
 //
 // Common Chips (Team Based)

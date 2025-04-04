@@ -8,6 +8,9 @@ function Private_AssignChipToTable(/*Table<String,ChipManager>*/ chip_table, /*C
 function Private_CreateSharedChipForTeam(/*Integer*/ max_team_size) /*-> Table<String,ChipManager>*/ {
     local shared_chips_for_team = {}
 
+    // For testing only
+    // Private_AssignChipToTable(shared_chips_for_team, ChipManager_DebugApplyProofOfConcept());
+
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerMaxHealth(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerAmmoMetalRegen(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerMovementSpeed(max_team_size));

@@ -1,7 +1,6 @@
 
-function CollectEventsInScope_AlternaWorld(events)
+function CollectEventsInScope_AlternaWorld(events_id, events)
 {
-	local events_id = "alterna_world_events"
 	getroottable()[events_id] <- events
 
 	local events_table = getroottable()[events_id]
@@ -16,7 +15,9 @@ function CollectEventsInScope_AlternaWorld(events)
 	{
 		if (cleanup_user_func) cleanup_user_func(params)
 		delete getroottable()[events_id]
-	} __CollectGameEventCallbacks(events_table)
+	}
+
+    __CollectGameEventCallbacks(events_table)
 }
 
 IncludeScript("alterna_world_chat_commands.nut");
@@ -28,39 +29,42 @@ IncludeScript("alterna_world_player.nut");
 IncludeScript("alterna_world_playerinventory.nut");
 IncludeScript("alterna_world_weapon.nut");
 
-// Initalize global variables
+class AlernaWorldManager {
+    chat_command_manager = null;
+    shared_chip_table = null
+    player_inventory_table = null;
+    loaded_pop_file_when_init = null;
 
-chat_command_manager <- ChatCommandManager(this);
-shared_chip_table <- CreateSharedTeamChip(Convars.GetInt("tf_mvm_defenders_team_size"));
-player_inventory_table <- {};
-
-function GetPlayerInventory(/*CTFPlayer*/ player) {
-    local steam_id = NetProps.GetPropString(player, "m_szNetworkIDString");
-
-    if (!(steam_id in player_inventory_table)) {
-        local name = NetProps.GetPropString(player, "m_szNetname");
-        DebugPrintToConsole(format("Initalizing player inventory for %s (%s)", steam_id, name));
-        player_inventory_table[steam_id] <- PlayerInventory(player, shared_chip_table);
+    constructor() {
+        chat_command_manager = ChatCommandManager(this);
+        shared_chip_table = CreateSharedTeamChip(Convars.GetInt("tf_mvm_defenders_team_size"));
+        player_inventory_table = {};
+        loaded_pop_file_when_init = GetCurrentLoadedPopFile();
+        DebugPrintToConsole(format("loaded_pop_file_when_init = %s", loaded_pop_file_when_init));
     }
 
-    return player_inventory_table[steam_id];
-}
+    function GetPlayerInventory(/*CTFPlayer*/ player) {
+        local steam_id = NetProps.GetPropString(player, "m_szNetworkIDString");
 
-::PostPlayerSpawn <- function()
-{
-    ApplyDefaultPlayerAttributes(self);
+        if (!(steam_id in player_inventory_table)) {
+            local name = NetProps.GetPropString(player, "m_szNetname");
+            DebugPrintToConsole(format("Initalizing player inventory for %s (%s)", steam_id, name));
+            player_inventory_table[steam_id] <- PlayerInventory(player, shared_chip_table);
+        }
 
-    local player_inventory = GetPlayerInventory(self);
-    player_inventory.ApplyChipsUpgradesToPlayer(self);
-}
+        return player_inventory_table[steam_id];
+    }
 
-// See following for more details on the events and it's params:
-// https://developer.valvesoftware.com/wiki/Team_Fortress_2/Scripting/Game_Events
+    function GetCurrentLoadedPopFile() /*-> String*/ {
+        local tf_objective_resource = Entities.FindByClassname(null, "tf_objective_resource");
+        return NetProps.GetPropString(tf_objective_resource, "m_iszMvMPopfileName");
+    }
 
-CollectEventsInScope_AlternaWorld
-({
-	OnGameEvent_post_inventory_application = function(params)
-	{
+    //
+    // Event Function
+    //
+
+    function EventPostInventoryApplication(params) {
 		local player = GetPlayerFromUserID(params.userid)
 
         if (player instanceof CTFPlayer && !player.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
@@ -70,17 +74,15 @@ CollectEventsInScope_AlternaWorld
             DebugPrintToConsole(format("Found non-AI player %s", player_name));
             player_inventory.ReapplyWeaponsToPlayer(player);
         }
-	}
+    }
 
-    OnGameEvent_player_say = function(params)
-    {
+    function EventPlayerSay(params) {
         local player = GetPlayerFromUserID(params.userid)
         local chat_msg = params.text;
         chat_command_manager.ProcessCommand(player, chat_msg);
     }
 
-    OnGameEvent_player_spawn = function(params)
-    {
+    function EventPlayerSpawn(params) {
         local player = GetPlayerFromUserID(params.userid)
 
         if (player != null && player instanceof CTFPlayer && !player.IsBotOfType(Constants.EBotType.TF_BOT_TYPE)) {
@@ -95,6 +97,73 @@ CollectEventsInScope_AlternaWorld
             if (params.team != 0)
             {
                 EntFireByHandle(player, "CallScriptFunction", "PostPlayerSpawn", 0, null, null)
+            }
+        }
+    }
+
+    //
+    // EntFire Functions
+    //
+
+    function EntFirePostPlayerSpawn(player) {
+        ApplyDefaultPlayerAttributes(player);
+
+        local player_inventory = GetPlayerInventory(player);
+        player_inventory.ApplyChipsUpgradesToPlayer(player);
+    }
+}
+
+function IsAlternaWorldManagerInitialized() {
+    return "alterna_world_manager_instance" in getroottable()
+}
+
+// https://discord.com/channels/415522947789488129/862709081209569310/1357548081041772554
+// only init the manager if one does not exist already
+if (!IsAlternaWorldManagerInitialized()) {
+    // To make sure our upgrades presist between a sucessful wave,
+    // we need to store the manager in the root table.
+    DebugPrintToConsole("Alterna World Manager instance not found, creating one.");
+    ::alterna_world_manager_instance <- AlernaWorldManager();
+}
+
+// See following for more details on the events and it's params:
+// https://developer.valvesoftware.com/wiki/Team_Fortress_2/Scripting/Game_Events
+
+::PostPlayerSpawn <- function() {
+    if (IsAlternaWorldManagerInitialized()) {
+        ::alterna_world_manager_instance.EntFirePostPlayerSpawn(self)
+    }
+}
+
+CollectEventsInScope_AlternaWorld("alterna_world_events",
+{
+	OnGameEvent_post_inventory_application = function(params) {
+        if (IsAlternaWorldManagerInitialized()) {
+            ::alterna_world_manager_instance.EventPostInventoryApplication(params)
+        }
+    }
+
+    OnGameEvent_player_say = function(params) {
+        if (IsAlternaWorldManagerInitialized()) {
+            ::alterna_world_manager_instance.EventPlayerSay(params)
+        }
+    }
+    OnGameEvent_player_spawn = function(params) {
+        if (IsAlternaWorldManagerInitialized()) {
+            ::alterna_world_manager_instance.EventPlayerSpawn(params)
+        }
+    }
+
+    // https://discord.com/channels/415522947789488129/862709081209569310/1357556662235566202
+    // https://developer.valvesoftware.com/wiki/Team_Fortress_2/Scripting/Game_Events#scorestats_accumulated_update
+    OnGameEvent_recalculate_holidays = function(params) {
+        if (GetRoundState() == Constants.ERoundState.GR_STATE_PREROUND) {
+            local currently_loaded_popfile = ::alterna_world_manager_instance.GetCurrentLoadedPopFile();
+            local prior_popfile = ::alterna_world_manager_instance.loaded_pop_file_when_init;
+            if (currently_loaded_popfile != prior_popfile) {
+                DebugPrintToConsole("Mission change detected. Removing traces of Alterna World...");
+                delete ::alterna_world_events
+                delete ::alterna_world_manager_instance
             }
         }
     }
