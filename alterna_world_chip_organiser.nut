@@ -46,7 +46,11 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,Table<String,ChipManag
     Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeCauseMarkForDeath());
     Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeApplyAtomizerEffect());
 
-    local solider_only_chips = {};
+    local soldier_only_chips = {};
+    Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponReplacementSoldierDisciplinaryAction());
+    Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponPrimaryFasterRocketsWhenBlastJumping());
+    Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponMeleeApplyEqualizerEffect());
+
     local pyro_only_chips = {};
     local demoman_only_chips = {};
     local heavyweapons_only_chips = {};
@@ -57,7 +61,7 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,Table<String,ChipManag
 
     local player_chips = {};
     player_chips[Constants.ETFClass.TF_CLASS_SCOUT]        <- scout_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_SOLDIER]      <- solider_only_chips;
+    player_chips[Constants.ETFClass.TF_CLASS_SOLDIER]      <- soldier_only_chips;
     player_chips[Constants.ETFClass.TF_CLASS_PYRO]         <- pyro_only_chips;
     player_chips[Constants.ETFClass.TF_CLASS_DEMOMAN]      <- demoman_only_chips;
     player_chips[Constants.ETFClass.TF_CLASS_HEAVYWEAPONS] <- heavyweapons_only_chips;

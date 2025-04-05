@@ -193,14 +193,14 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
     ];
 
 
-    local solider_loadout_default = function() {
+    local soldier_loadout_default = function() {
         return CreateCustomLoadoutPrimaryAndMelee(
             CreateWeaponGeneric("tf_weapon_rocketlauncher", 18),
             CreateWeaponGeneric("tf_weapon_shovel", 6)
         );
     }
-    local approved_solider_loadouts = [
-        solider_loadout_default
+    local approved_soldier_loadouts = [
+        soldier_loadout_default
     ];
 
 
@@ -311,7 +311,7 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
 
     local all_approved_weapons = {}
     all_approved_weapons[Constants.ETFClass.TF_CLASS_SCOUT]        <- approved_scout_loadouts;
-    all_approved_weapons[Constants.ETFClass.TF_CLASS_SOLDIER]      <- approved_solider_loadouts;
+    all_approved_weapons[Constants.ETFClass.TF_CLASS_SOLDIER]      <- approved_soldier_loadouts;
     all_approved_weapons[Constants.ETFClass.TF_CLASS_PYRO]         <- approved_pyro_loadouts;
     all_approved_weapons[Constants.ETFClass.TF_CLASS_DEMOMAN]      <- approved_demoman_loadouts;
     all_approved_weapons[Constants.ETFClass.TF_CLASS_HEAVYWEAPONS] <- approved_heavy_loadouts;

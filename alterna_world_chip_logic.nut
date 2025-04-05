@@ -52,6 +52,10 @@ class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
                 player.AddCustomAttribute("max health additive bonus", 175 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
+            case Constants.ETFClass.TF_CLASS_SOLDIER:
+                player.AddCustomAttribute("max health additive bonus", 150 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
             default:
                 player.AddCustomAttribute("max health additive bonus", 1000, ATTRIBUTE_DURATION_FOREVER);
                 break;
@@ -99,6 +103,10 @@ class ChipManager_PlayerMovementSpeed extends TeamPenaltyChipManager {
 
     function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
         switch (player.GetPlayerClass()) {
+            case Constants.ETFClass.TF_CLASS_SOLDIER:
+                player.AddCustomAttribute("move speed bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
             default:
                 player.AddCustomAttribute("move speed bonus", 1.0 + (0.3 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
@@ -134,7 +142,6 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
-            // case "tf_weapon_rocketlauncher":
             // case "tf_weapon_flamethrower":
             // case "tf_weapon_grenadelauncher":
             // case "tf_weapon_minigun":
@@ -143,6 +150,11 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
             // case "tf_weapon_sniperrifle":
             // case "tf_weapon_revolver":
                 weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+
+            case "tf_weapon_rocketlauncher":
+                // Nerf the damage bonus
+                weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
     }
@@ -159,6 +171,7 @@ class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyC
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
+            case "tf_weapon_rocketlauncher":
                 weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -176,6 +189,7 @@ class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChi
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
+            case "tf_weapon_rocketlauncher":
                 weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -193,6 +207,7 @@ class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipM
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
+            case "tf_weapon_rocketlauncher":
                 weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -212,6 +227,8 @@ class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChip
             case "tf_weapon_scattergun":
                 weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
+            case "tf_weapon_rocketlauncher":
+                weapon.AddAttribute("clip size upgrade atomic", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER)
         }
     }
 }
@@ -228,6 +245,7 @@ class ChipManager_WeaponMeleeDamageIncrease extends TeamPenaltyChipManager {
         switch (weapon.GetClassname()) {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
+            case "tf_weapon_shovel":
                 // Should I buff?
                 weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
@@ -245,7 +263,15 @@ class ChipManager_WeaponMeleeAttackSpeedIncrease extends TeamPenaltyChipManager 
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (weapon_type == CustomLoadoutWeaponType.MELEE) {
-            weapon.AddAttribute("melee attack rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_shovel":
+                    weapon.AddAttribute("melee attack rate bonus", 1.0 - (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+
+                default:
+                    weapon.AddAttribute("melee attack rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
         }
     }
 }
@@ -402,6 +428,76 @@ class ChipManager_WeaponMeleeApplyAtomizerEffect extends ChipManager {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
                 weapon.AddAttribute("air dash count", 1, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+//
+// Soldier only
+//
+
+class ChipManager_WeaponReplacementSoldierDisciplinaryAction extends ChipManager {
+    function GetInternalChipName() { return "weapon_replacement_soldier_disciplinary_action"; }
+    function GetChipDescription()  { return "Unlock the Disciplinary Action (additional chips upgrade the weapon)"; }
+
+    constructor() {
+        base.constructor(3);
+    }
+
+    function ReplaceWeaponInCustomLoadout(/*CustomLoadout*/ loadout) {
+        if (chip_count > 0) {
+        // Destroy previous weapon
+        loadout.melee_weapon.Destroy();
+        // Add new weapon
+        loadout.melee_weapon = CreateWeaponGeneric("tf_weapon_shovel", 447);
+        // Undo Disciplinary Action nerf
+        loadout.melee_weapon.AddAttribute("damage penalty", 1.0, ATTRIBUTE_DURATION_FOREVER)
+        }
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count > 1 && weapon.GetClassname() == "tf_weapon_shovel") {
+            weapon.AddAttribute("speed_boost_on_hit_enemy", 1, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponPrimaryFasterRocketsWhenBlastJumping extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_faster_rockets_when_blast_jumping"; }
+    function GetChipDescription()  { return "Faster rockets when blast jumping"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count < 1) {
+            return;
+        }
+
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_rocketlauncher":
+                weapon.AddAttribute("rocketjump attackrate bonus", 0.35, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeApplyEqualizerEffect extends ChipManager {
+    function GetInternalChipName() { return "weapon_melee_apply_equalizer_effect"; }
+    function GetChipDescription()  { return "Apply Equalizer effect to Soldier's melee"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count < 1) {
+            return;
+        }
+
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_shovel":
+                weapon.AddAttribute("mod shovel damage boost", 1, ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }
