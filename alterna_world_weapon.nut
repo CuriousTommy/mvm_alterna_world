@@ -229,7 +229,7 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
         );
     }
     local demoman_loadout_stickybomb = function() {
-        CreateCustomLoadoutSecondaryAndMelee(
+        return CreateCustomLoadoutSecondaryAndMelee(
             CreateWeaponGeneric("tf_weapon_pipebomblauncher", 20),
             CreateWeaponGeneric("tf_weapon_bottle", 1)
         );
@@ -290,8 +290,15 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
             CreateWeaponGeneric("tf_weapon_club", 3)
         );
     }
+    local sniper_loadout_huntsman = function() {
+        return CreateCustomLoadoutPrimaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_compound_bow", 56),
+            CreateWeaponGeneric("tf_weapon_club", 3)
+        );
+    }
     local approved_sniper_loadouts = [
-        sniper_loadout_default
+        sniper_loadout_default,
+        sniper_loadout_huntsman
     ];
 
 

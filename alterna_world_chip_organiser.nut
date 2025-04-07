@@ -5,6 +5,12 @@ function Private_AssignChipToTable(/*Table<String,ChipManager>*/ chip_table, /*C
     chip_table[chip_key] <- chip_value;
 }
 
+function Private_AssignAllChipsToTable(/*Table<String,ChipManager>*/ chip_table_reference, /*Table<String,ChipManager>*/ chip_table_append) {
+    foreach (key,value in chip_table_reference) {
+        chip_table_append[key] <- value;
+    }
+}
+
 function Private_CreateSharedChipForTeam(/*Integer*/ max_team_size) /*-> Table<String,ChipManager>*/ {
     local shared_chips_for_team = {}
 
@@ -38,41 +44,93 @@ function CreateSharedTeamChip(/*Integer*/ max_team_size) /*-> Table<Constants.ET
     return shared_chips;
 }
 
-function CreatePlayerChip() /*-> Table<Constants.ETFClass,Table<String,ChipManager>>*/ {
-    local scout_only_chips = {};
-    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponReplacementScoutSandman());
-    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponPrimaryMinicritsFromBehind());
-    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeCauseBleeding());
-    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeCauseMarkForDeath());
-    Private_AssignChipToTable(scout_only_chips, ChipManager_WeaponMeleeApplyAtomizerEffect());
+function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,ChipManager>>>*/ {
+    local scout_only_chips_defaultloadout = {};
+    Private_AssignChipToTable(scout_only_chips_defaultloadout, ChipManager_WeaponReplacementScoutSandman());
+    Private_AssignChipToTable(scout_only_chips_defaultloadout, ChipManager_WeaponPrimaryMinicritsFromBehind());
+    Private_AssignChipToTable(scout_only_chips_defaultloadout, ChipManager_WeaponMeleeCauseBleeding());
+    Private_AssignChipToTable(scout_only_chips_defaultloadout, ChipManager_WeaponMeleeCauseMarkForDeath());
+    Private_AssignChipToTable(scout_only_chips_defaultloadout, ChipManager_WeaponMeleeApplyAtomizerEffect());
 
-    local soldier_only_chips = {};
-    Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponReplacementSoldierDisciplinaryAction());
-    Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponPrimaryFasterRocketsWhenBlastJumping());
-    Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponMeleeApplyEqualizerEffect());
 
-    local pyro_only_chips = {};
-    Private_AssignChipToTable(pyro_only_chips, ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration());
-    Private_AssignChipToTable(pyro_only_chips, ChipManager_WeaponPrimaryIncreaseFireRange());
-    Private_AssignChipToTable(pyro_only_chips, ChipManager_WeaponMeleeIgniteOnHit());
+    local soldier_only_chips_defaultloadout = {};
+    Private_AssignChipToTable(soldier_only_chips_defaultloadout, ChipManager_WeaponReplacementSoldierDisciplinaryAction());
+    Private_AssignChipToTable(soldier_only_chips_defaultloadout, ChipManager_WeaponPrimaryFasterRocketsWhenBlastJumping());
+    Private_AssignChipToTable(soldier_only_chips_defaultloadout, ChipManager_WeaponMeleeApplyEqualizerEffect());
 
-    local demoman_only_chips = {};
-    local heavyweapons_only_chips = {};
-    local engineer_only_chips = {};
-    local medic_only_chips = {};
-    local sniper_only_chips = {};
-    local spy_only_chips = {};
+
+    local pyro_only_chips_shared = {};
+    Private_AssignChipToTable(pyro_only_chips_shared, ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration());
+    Private_AssignChipToTable(pyro_only_chips_shared, ChipManager_WeaponPrimaryIncreaseFireRange());
+    Private_AssignChipToTable(pyro_only_chips_shared, ChipManager_WeaponMeleeIgniteOnHit());
+    local pyro_only_chips_defaultloadout = {};
+    Private_AssignAllChipsToTable(pyro_only_chips_shared, pyro_only_chips_defaultloadout);
+    local pyro_only_chips_dragonfury = {};
+    Private_AssignAllChipsToTable(pyro_only_chips_shared, pyro_only_chips_dragonfury);
+
+
+    local demoman_only_chips_shared = {};
+    local demoman_only_chips_defaultloadout = {};
+    Private_AssignAllChipsToTable(demoman_only_chips_shared, demoman_only_chips_defaultloadout);
+    local demoman_only_chips_pipebomb = {};
+    Private_AssignAllChipsToTable(demoman_only_chips_shared, demoman_only_chips_pipebomb);
+
+
+    local heavyweapons_only_chips_defaultloadout = {};
+
+
+    local engineer_only_chips_defaultloadout = {};
+
+
+    local medic_only_chips_shared = {};
+    local medic_only_chips_defaultloadout = {};
+    Private_AssignAllChipsToTable(medic_only_chips_shared, medic_only_chips_defaultloadout);
+    local medic_only_chips_crossbow = {};
+    Private_AssignAllChipsToTable(medic_only_chips_shared, medic_only_chips_crossbow);
+
+
+    local sniper_only_chips_shared = {};
+    local sniper_only_chips_defaultloadout = {};
+    Private_AssignAllChipsToTable(sniper_only_chips_shared, sniper_only_chips_defaultloadout);
+    local sniper_only_chips_huntsman = {};
+    Private_AssignAllChipsToTable(sniper_only_chips_shared, sniper_only_chips_huntsman);
+
+
+    local spy_only_chips_defaultloadout = {};
+
 
     local player_chips = {};
-    player_chips[Constants.ETFClass.TF_CLASS_SCOUT]        <- scout_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_SOLDIER]      <- soldier_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_PYRO]         <- pyro_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_DEMOMAN]      <- demoman_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_HEAVYWEAPONS] <- heavyweapons_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_ENGINEER]     <- engineer_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_MEDIC]        <- medic_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_SNIPER]       <- sniper_only_chips;
-    player_chips[Constants.ETFClass.TF_CLASS_SPY]          <- spy_only_chips;
+    player_chips[Constants.ETFClass.TF_CLASS_SCOUT] <- [
+        scout_only_chips_defaultloadout
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_SOLDIER] <- [
+        soldier_only_chips_defaultloadout
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_PYRO] <- [
+        pyro_only_chips_defaultloadout,
+        pyro_only_chips_dragonfury
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_DEMOMAN] <- [
+        demoman_only_chips_defaultloadout,
+        demoman_only_chips_pipebomb
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_HEAVYWEAPONS] <- [
+        heavyweapons_only_chips_defaultloadout
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_ENGINEER] <- [
+        engineer_only_chips_defaultloadout
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_MEDIC] <- [
+        medic_only_chips_defaultloadout,
+        medic_only_chips_crossbow
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_SNIPER] <- [
+        sniper_only_chips_defaultloadout,
+        sniper_only_chips_huntsman
+    ];
+    player_chips[Constants.ETFClass.TF_CLASS_SPY] <- [
+        spy_only_chips_defaultloadout
+    ];
 
     return player_chips;
 }

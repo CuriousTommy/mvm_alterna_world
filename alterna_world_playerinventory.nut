@@ -24,10 +24,25 @@ class PlayerInventory {
     constructor(/*CTFPlayer*/ player, /*Table<Constants.ETFTeam,Table<String,ChipManager>>*/ shared_chips) {
         this.shared_chips = shared_chips;
         this.player_chips = CreatePlayerChip();
-        ForceUpdateCachedChips(player);
 
         this.player_weapons = GenerateDefaultApprovedWeapons();
-        this.player_selected_weapon_loadout = 0;
+        this.player_selected_weapon_loadout = Private_GenerateDefaultSelectedLoadout();
+
+        ForceUpdateCachedChips(player);
+    }
+
+    function Private_GenerateDefaultSelectedLoadout() {
+        local default_loadout_selection = {};
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_SCOUT]        <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_SOLDIER]      <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_PYRO]         <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_DEMOMAN]      <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_HEAVYWEAPONS] <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_ENGINEER]     <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_MEDIC]        <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_SNIPER]       <- 0;
+        default_loadout_selection[Constants.ETFClass.TF_CLASS_SPY]          <- 0;
+        return default_loadout_selection;
     }
 
     function Private_UpdateCachedChips(/*CTFPlayer*/ player) {
@@ -46,7 +61,8 @@ class PlayerInventory {
         }
 
         // Copy over the player specific chips (based on the class they choose)
-        foreach(chip_key,chip_value in player_chips[player_current_class]) {
+        local selected_loadout = player_selected_weapon_loadout[player_current_class];
+        foreach(chip_key,chip_value in player_chips[player_current_class][selected_loadout]) {
             cached_chips[chip_key] <- chip_value;
         }
     }
@@ -63,15 +79,29 @@ class PlayerInventory {
         return cached_chips;
     }
 
-    function Private_GetSelectedWeaponLoadout(/*CTFPlayer*/ player) {
-        local weapon_loadout_list = player_weapons[player.GetPlayerClass()];
-        if (player_selected_weapon_loadout >= weapon_loadout_list.len()) {
-            // If the selected weapon loadout number exceed the number of available
-            // loadouts, set it back to the default loadout (0)
-            player_selected_weapon_loadout = 0;
+    function CycleLoadout(/*CTFPlayer*/ player) /*-> Boolean*/ {
+        local player_class = player.GetPlayerClass();
+        local max_loadouts = player_weapons[player_class].len();
+
+        local current_loadout_selection = player_selected_weapon_loadout[player_class];
+        local new_loadout_selection = current_loadout_selection + 1;
+        if (new_loadout_selection >= max_loadouts) {
+            new_loadout_selection = 0;
         }
 
-        return weapon_loadout_list[player_selected_weapon_loadout]();
+        if (new_loadout_selection != current_loadout_selection) {
+            player_selected_weapon_loadout[player_class] = new_loadout_selection;
+            ForceUpdateCachedChips(player);
+            return true;
+        }
+
+        return false;
+    }
+
+    function Private_GetSelectedWeaponLoadout(/*CTFPlayer*/ player) {
+        local player_class = player.GetPlayerClass();
+        local selected_loadout = player_selected_weapon_loadout[player_class];
+        return player_weapons[player_class][selected_loadout]();
     }
 
     function ReapplyWeaponsToPlayer(/*CTFPlayer*/ player) {

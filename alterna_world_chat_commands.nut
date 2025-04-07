@@ -32,6 +32,10 @@ class ChatCommandManager {
                     DebugMaxOutAllChips(player);
                     return;
 
+                case "debugcycleloadout":
+                    DebugCycleLoadout(player);
+                    return;
+
                 default:
                     PrintToChatWindow(player, format("Unknown command '%s'", command_args[0]));
                     return;
@@ -100,5 +104,19 @@ class ChatCommandManager {
         // Recreate weapon and apply chip upgrades to weapons/player
         player_inventory.ReapplyWeaponsToPlayer(player);
         player_inventory.ApplyChipsUpgradesToPlayer(player);
+    }
+
+    function DebugCycleLoadout(/*CTFPlayer*/ player) {
+        if (!IsCheatingEnabled()) {
+            PrintToChatWindow(player, "sv_cheats must be set to 1 to use this command");
+            return;
+        }
+
+        local player_inventory = global_values.GetPlayerInventory(player);
+        if (player_inventory.CycleLoadout(player)) {
+            // Recreate weapon and apply chip upgrades to weapons/player
+            player_inventory.ReapplyWeaponsToPlayer(player);
+            player_inventory.ApplyChipsUpgradesToPlayer(player);
+        }
     }
 }
