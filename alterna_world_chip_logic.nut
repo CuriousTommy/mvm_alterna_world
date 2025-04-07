@@ -147,6 +147,7 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             case "tf_weapon_flamethrower":
+            case "tf_weapon_flaregun":
             // case "tf_weapon_grenadelauncher":
             // case "tf_weapon_minigun":
             // case "tf_weapon_shotgun_primary":
@@ -176,6 +177,7 @@ class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyC
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
+            case "tf_weapon_flaregun":
                 weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -194,6 +196,7 @@ class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChi
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
+            case "tf_weapon_flaregun":
                 weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -213,7 +216,12 @@ class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipM
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_flamethrower":
-                weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
+            // Unlike other weapons, we are going to dramatically increase the max ammo allowed for the Scorch Shot.
+            case "tf_weapon_flaregun":
+                weapon.AddAttribute("maxammo secondary increased", 1.0 + (5.25 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -328,6 +336,7 @@ class ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration extends ChipManage
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_flamethrower":
+            case "tf_weapon_flaregun":
             case "tf_weapon_fireaxe":
                 weapon.AddAttribute("weapon burn dmg increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 weapon.AddAttribute("weapon burn time increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);

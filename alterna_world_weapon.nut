@@ -210,15 +210,15 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
             CreateWeaponGeneric("tf_weapon_fireaxe", 2)
         );
     }
-    local pyro_loadout_dragonsfury = function() {
-        return CreateCustomLoadoutPrimaryAndMelee(
-            CreateWeaponGeneric("tf_weapon_rocketlauncher_fireball", 1178)
+    local pyro_loadout_flaregun = function() {
+        return CreateCustomLoadoutSecondaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_flaregun", 740)
             CreateWeaponGeneric("tf_weapon_fireaxe", 2)
         );
     }
     local approved_pyro_loadouts = [
         pyro_loadout_default,
-        pyro_loadout_dragonsfury
+        pyro_loadout_flaregun
     ];
 
 

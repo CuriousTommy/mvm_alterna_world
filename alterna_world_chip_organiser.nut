@@ -61,12 +61,12 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
 
     local pyro_only_chips_shared = {};
     Private_AssignChipToTable(pyro_only_chips_shared, ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration());
-    Private_AssignChipToTable(pyro_only_chips_shared, ChipManager_WeaponPrimaryIncreaseFireRange());
     Private_AssignChipToTable(pyro_only_chips_shared, ChipManager_WeaponMeleeIgniteOnHit());
     local pyro_only_chips_defaultloadout = {};
     Private_AssignAllChipsToTable(pyro_only_chips_shared, pyro_only_chips_defaultloadout);
-    local pyro_only_chips_dragonfury = {};
-    Private_AssignAllChipsToTable(pyro_only_chips_shared, pyro_only_chips_dragonfury);
+    Private_AssignChipToTable(pyro_only_chips_defaultloadout, ChipManager_WeaponPrimaryIncreaseFireRange());
+    local pyro_only_chips_flaregun = {};
+    Private_AssignAllChipsToTable(pyro_only_chips_shared, pyro_only_chips_flaregun);
 
 
     local demoman_only_chips_shared = {};
@@ -108,7 +108,7 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
     ];
     player_chips[Constants.ETFClass.TF_CLASS_PYRO] <- [
         pyro_only_chips_defaultloadout,
-        pyro_only_chips_dragonfury
+        pyro_only_chips_flaregun
     ];
     player_chips[Constants.ETFClass.TF_CLASS_DEMOMAN] <- [
         demoman_only_chips_defaultloadout,
