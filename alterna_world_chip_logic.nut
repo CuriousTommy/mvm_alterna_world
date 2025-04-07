@@ -56,6 +56,10 @@ class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
                 player.AddCustomAttribute("max health additive bonus", 150 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
+            case Constants.ETFClass.TF_CLASS_PYRO:
+                player.AddCustomAttribute("max health additive bonus", 225 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
             default:
                 player.AddCustomAttribute("max health additive bonus", 1000, ATTRIBUTE_DURATION_FOREVER);
                 break;
@@ -142,7 +146,7 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
-            // case "tf_weapon_flamethrower":
+            case "tf_weapon_flamethrower":
             // case "tf_weapon_grenadelauncher":
             // case "tf_weapon_minigun":
             // case "tf_weapon_shotgun_primary":
@@ -208,6 +212,7 @@ class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipM
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
+            case "tf_weapon_flamethrower":
                 weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -246,7 +251,7 @@ class ChipManager_WeaponMeleeDamageIncrease extends TeamPenaltyChipManager {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
             case "tf_weapon_shovel":
-                // Should I buff?
+            case "tf_weapon_fireaxe":
                 weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -311,6 +316,25 @@ class ChipManager_PlayerAndWeaponHealthRestored extends TeamPenaltyChipManager {
 //
 // Common Chips (Individual Based)
 //
+
+class ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration extends ChipManager {
+    function GetInternalChipName() { return "weapon_any_increase_afterburn_damage_and_duration"; }
+    function GetChipDescription()  { return "Increase afterburn damage and duration"; }
+
+    constructor() {
+        base.constructor(4);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_flamethrower":
+            case "tf_weapon_fireaxe":
+                weapon.AddAttribute("weapon burn dmg increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                weapon.AddAttribute("weapon burn time increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
 
 class ChipManager_WeaponPrimaryMinicritsFromBehind extends ChipManager {
     function GetInternalChipName() { return "weapon_primary_minicrits_from_behind"; }
@@ -438,7 +462,7 @@ class ChipManager_WeaponMeleeApplyAtomizerEffect extends ChipManager {
 
 class ChipManager_WeaponReplacementSoldierDisciplinaryAction extends ChipManager {
     function GetInternalChipName() { return "weapon_replacement_soldier_disciplinary_action"; }
-    function GetChipDescription()  { return "Unlock the Disciplinary Action (additional chips upgrade the weapon)"; }
+    function GetChipDescription()  { return "Unlock the Disciplinary Action (additional chip unlocks speed boost on enemy hit)"; }
 
     constructor() {
         base.constructor(3);
@@ -498,6 +522,46 @@ class ChipManager_WeaponMeleeApplyEqualizerEffect extends ChipManager {
         switch (weapon.GetClassname()) {
             case "tf_weapon_shovel":
                 weapon.AddAttribute("mod shovel damage boost", 1, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+//
+// Pyro only
+//
+
+class ChipManager_WeaponPrimaryIncreaseFireRange extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_increase_fire_range"; }
+    function GetChipDescription() { return "Increase range of primary weapon"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    // Source: https://discord.com/channels/415522947789488129/480416823695638578/518178826497556496
+    // > 'flame_drag' - How much resistance a flame faces during flight. Lower values make flames travel farther.
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_fireaxe":
+                // The default value for "flame_drag" is 8.5
+                weapon.AddAttribute("flame_drag", 8.5 - (4.25), ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeIgniteOnHit extends ChipManager {
+    function GetInternalChipName() { return "weapon_melee_ignite_on_hit"; }
+    function GetChipDescription() { return "Ignite enemy when hit with melee (Additional chip will cause mini-crits against burning players)"; }
+
+    constructor() {
+        base.constructor(2);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_fireaxe":
+                if (chip_count > 0) { weapon.AddAttribute("Set DamageType Ignite", 1, ATTRIBUTE_DURATION_FOREVER); }
+                if (chip_count > 1) { weapon.AddAttribute("minicrit vs burning player", 1, ATTRIBUTE_DURATION_FOREVER); }
         }
     }
 }

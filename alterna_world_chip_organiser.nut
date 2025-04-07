@@ -52,6 +52,10 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,Table<String,ChipManag
     Private_AssignChipToTable(soldier_only_chips, ChipManager_WeaponMeleeApplyEqualizerEffect());
 
     local pyro_only_chips = {};
+    Private_AssignChipToTable(pyro_only_chips, ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration());
+    Private_AssignChipToTable(pyro_only_chips, ChipManager_WeaponPrimaryIncreaseFireRange());
+    Private_AssignChipToTable(pyro_only_chips, ChipManager_WeaponMeleeIgniteOnHit());
+
     local demoman_only_chips = {};
     local heavyweapons_only_chips = {};
     local engineer_only_chips = {};
