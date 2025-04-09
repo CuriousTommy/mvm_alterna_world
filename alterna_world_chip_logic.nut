@@ -61,6 +61,10 @@ class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
                 player.AddCustomAttribute("max health additive bonus", 225 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
+            case Constants.ETFClass.TF_CLASS_HEAVYWEAPONS:
+                player.AddCustomAttribute("max health additive bonus", 300 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
             default:
                 player.AddCustomAttribute("max health additive bonus", 1000, ATTRIBUTE_DURATION_FOREVER);
                 break;
@@ -149,7 +153,6 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
             case "tf_weapon_scattergun":
             case "tf_weapon_flamethrower":
             case "tf_weapon_flaregun":
-            // case "tf_weapon_minigun":
             // case "tf_weapon_shotgun_primary":
             // case "tf_weapon_syringegun_medic":
             // case "tf_weapon_sniperrifle":
@@ -164,6 +167,11 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
             case "tf_weapon_grenadelauncher":
             case "tf_weapon_pipebomblauncher":
                 weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+
+            // Technically not a nerf, but I don't want Heavy's minigun to be too overpowered...
+            case "tf_weapon_minigun":
+                weapon.AddAttribute("damage bonus", 1.0 + (0.2 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -205,6 +213,7 @@ class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChi
             case "tf_weapon_flaregun":
             case "tf_weapon_grenadelauncher":
             case "tf_weapon_pipebomblauncher":
+            case "tf_weapon_minigun":
                 weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -225,6 +234,7 @@ class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipM
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_flamethrower":
             case "tf_weapon_grenadelauncher":
+            case "tf_weapon_minigun":
                 weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
@@ -433,6 +443,7 @@ class ChipManager_WeaponMeleeMinicritsOnKill extends ChipManager {
         switch (weapon.GetClassname()) {
             case "tf_weapon_bottle":
             case "tf_weapon_sword":
+            case "tf_weapon_fists":
                 weapon.AddAttribute("minicritboost on kill", (5 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
         }
     }
@@ -663,6 +674,79 @@ class ChipManager_WeaponSecondaryIncreaseMaxStickybombsOut extends ChipManager {
                 weapon.AddAttribute("max pipebombs decreased", -4, ATTRIBUTE_DURATION_FOREVER);
                 // Then Buff
                 weapon.AddAttribute("max pipebombs increased", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+//
+// Heavy only
+//
+
+class ChipManager_WeaponPrimaryApplyHuoLongHeaterAttributes extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_apply_huo_long_heater_attributes"; }
+    function GetChipDescription() { return "Apply Huo-Long Heater Effect (Additional chip ignites enemy On hit)"; }
+
+    constructor() {
+        base.constructor(2);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_minigun":
+                if (chip_count > 0) { weapon.AddAttribute("ring of fire while aiming", 1, ATTRIBUTE_DURATION_FOREVER); }
+                if (chip_count > 1) { weapon.AddAttribute("Set DamageType Ignite", 1, ATTRIBUTE_DURATION_FOREVER); }
+        }
+    }
+}
+
+class ChipManager_WeaponPrimaryIncreaseMoveSpeedWhileAiming extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_increase_move_speed_while_aiming"; }
+    function GetChipDescription()  { return "Increase movement speed while aiming with primary"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_minigun":
+                weapon.AddAttribute("aiming movespeed increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponPrimaryReduceSpinupTime extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_reduce_spinup_time"; }
+    function GetChipDescription()  { return "Reduce spinup time of primary weapon"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_minigun":
+                weapon.AddAttribute("minigun spinup time decreased", 1.0 - (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeSpeedBoostOnHit extends ChipManager {
+    function GetInternalChipName() { return "weapon_melee_speed_boost_on_hit"; }
+    function GetChipDescription()  { return "Gain speed boost on hit with melee"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count < 1) {
+            return
+        }
+
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_fists":
+                weapon.AddAttribute("speed_boost_on_hit", 5, ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }

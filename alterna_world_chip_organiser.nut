@@ -81,7 +81,11 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
 
 
     local heavyweapons_only_chips_defaultloadout = {};
-
+    Private_AssignChipToTable(heavyweapons_only_chips_defaultloadout, ChipManager_WeaponPrimaryApplyHuoLongHeaterAttributes());
+    Private_AssignChipToTable(heavyweapons_only_chips_defaultloadout, ChipManager_WeaponPrimaryIncreaseMoveSpeedWhileAiming());
+    Private_AssignChipToTable(heavyweapons_only_chips_defaultloadout, ChipManager_WeaponPrimaryReduceSpinupTime());
+    Private_AssignChipToTable(heavyweapons_only_chips_defaultloadout, ChipManager_WeaponMeleeMinicritsOnKill());
+    Private_AssignChipToTable(heavyweapons_only_chips_defaultloadout, ChipManager_WeaponMeleeSpeedBoostOnHit());
 
     local engineer_only_chips_defaultloadout = {};
 
