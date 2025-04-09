@@ -591,9 +591,9 @@ class ChipManager_WeaponPrimaryIncreaseFireRange extends ChipManager {
     // > 'flame_drag' - How much resistance a flame faces during flight. Lower values make flames travel farther.
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
-            case "tf_weapon_fireaxe":
+            case "tf_weapon_flamethrower":
                 // The default value for "flame_drag" is 8.5
-                weapon.AddAttribute("flame_drag", 8.5 - (4.25), ATTRIBUTE_DURATION_FOREVER);
+                weapon.AddAttribute("flame_drag", 8.5 - (4.25 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }
