@@ -98,6 +98,24 @@ class PlayerInventory {
         return false;
     }
 
+    // I haven't figure out a way to reapply a wearable to a player.
+    function RemoveWearableFromPlayer(/*CTFPlayer*/ player) {
+        local wearable = player.FirstMoveChild()
+        while (wearable != null) {
+            local current_wearable = wearable;
+            wearable = wearable.NextMovePeer()
+
+            switch (current_wearable.GetClassname()) {
+                case "tf_wearable":
+                case "tf_wearable_demoshield":
+                case "tf_wearable_razorback":
+                    DebugPrintToConsole(format("Removing wearable %s", current_wearable.GetModelName()));
+                    current_wearable.Destroy();
+                    break;
+            }
+        }
+    }
+
     function Private_GetSelectedWeaponLoadout(/*CTFPlayer*/ player) {
         local player_class = player.GetPlayerClass();
         local selected_loadout = player_selected_weapon_loadout[player_class];

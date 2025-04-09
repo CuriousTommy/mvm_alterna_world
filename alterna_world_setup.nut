@@ -72,6 +72,8 @@ class AlernaWorldManager {
             local player_inventory = GetPlayerInventory(player);
 
             DebugPrintToConsole(format("Found non-AI player %s", player_name));
+
+            player_inventory.RemoveWearableFromPlayer(player);
             player_inventory.ReapplyWeaponsToPlayer(player);
         }
     }
