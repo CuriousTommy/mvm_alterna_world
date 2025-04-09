@@ -157,16 +157,16 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
             // case "tf_weapon_syringegun_medic":
             // case "tf_weapon_sniperrifle":
             // case "tf_weapon_revolver":
-                weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
             // The following weapons have their damage bonus nerfed
             case "tf_weapon_rocketlauncher":
-                weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
             case "tf_weapon_grenadelauncher":
             case "tf_weapon_pipebomblauncher":
-                weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
             // Technically not a nerf, but I don't want Heavy's minigun to be too overpowered...
@@ -192,7 +192,7 @@ class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyC
             case "tf_weapon_flaregun":
             case "tf_weapon_grenadelauncher":
             case "tf_weapon_pipebomblauncher":
-                weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -214,7 +214,7 @@ class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChi
             case "tf_weapon_grenadelauncher":
             case "tf_weapon_pipebomblauncher":
             case "tf_weapon_minigun":
-                weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -262,12 +262,12 @@ class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChip
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             case "tf_weapon_pipebomblauncher":
-                weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_grenadelauncher":
-                weapon.AddAttribute("clip size upgrade atomic", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("clip size upgrade atomic", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -283,7 +283,7 @@ class ChipManager_WeaponMeleeDamageIncrease extends TeamPenaltyChipManager {
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (weapon_type == CustomLoadoutWeaponType.MELEE) {
-            weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+            weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }
@@ -337,7 +337,7 @@ class ChipManager_PlayerAndWeaponHealthRestored extends TeamPenaltyChipManager {
             case CustomLoadoutWeaponType.PRIMARY:
             case CustomLoadoutWeaponType.SECONDARY:
             case CustomLoadoutWeaponType.MELEE:
-                weapon.AddAttribute("heal on kill", (25 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER)
+                weapon.AddAttribute("heal on kill", (25 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -468,7 +468,7 @@ class ChipManager_WeaponReplacementScoutSandman extends ChipManager {
             // Add new weapon
             loadout.melee_weapon = CreateWeaponGeneric("tf_weapon_bat_wood", 44);
             // Undo Sandman nerf
-            loadout.melee_weapon.AddAttribute("max health additive penalty", 0, ATTRIBUTE_DURATION_FOREVER)
+            loadout.melee_weapon.AddAttribute("max health additive penalty", 0, ATTRIBUTE_DURATION_FOREVER);
         }
     }
 
@@ -585,7 +585,7 @@ class ChipManager_WeaponMeleeApplyEqualizerEffect extends ChipManager {
 
 class ChipManager_WeaponPrimaryIncreaseFireRange extends ChipManager {
     function GetInternalChipName() { return "weapon_primary_increase_fire_range"; }
-    function GetChipDescription() { return "Increase range of primary weapon"; }
+    function GetChipDescription()  { return "Increase range of primary weapon"; }
 
     constructor() {
         base.constructor(5);
@@ -604,7 +604,7 @@ class ChipManager_WeaponPrimaryIncreaseFireRange extends ChipManager {
 
 class ChipManager_WeaponMeleeIgniteOnHit extends ChipManager {
     function GetInternalChipName() { return "weapon_melee_ignite_on_hit"; }
-    function GetChipDescription() { return "Ignite enemy when hit with melee (Additional chip will cause mini-crits against burning players)"; }
+    function GetChipDescription()  { return "Ignite enemy when hit with melee (Additional chip will cause mini-crits against burning players)"; }
 
     constructor() {
         base.constructor(2);
@@ -645,7 +645,7 @@ class ChipManager_WeaponReplacementDemomanScotsmansSkullcutter extends ChipManag
 
 class ChipManager_WeaponSecondaryReduceChargeTime extends ChipManager {
     function GetInternalChipName() { return "weapon_secondary_reduce_charge_time"; }
-    function GetChipDescription() { return "Reduce charge time of secondary"; }
+    function GetChipDescription()  { return "Reduce charge time of secondary"; }
 
     constructor() {
         base.constructor(4);
@@ -661,7 +661,7 @@ class ChipManager_WeaponSecondaryReduceChargeTime extends ChipManager {
 
 class ChipManager_WeaponSecondaryIncreaseMaxStickybombsOut extends ChipManager {
     function GetInternalChipName() { return "weapon_secondary_increase_max_stickybombs_out"; }
-    function GetChipDescription() { return "Increase number of stickybombs out of the field"; }
+    function GetChipDescription()  { return "Increase number of stickybombs out of the field"; }
 
     constructor() {
         base.constructor(4);
@@ -684,7 +684,7 @@ class ChipManager_WeaponSecondaryIncreaseMaxStickybombsOut extends ChipManager {
 
 class ChipManager_WeaponPrimaryApplyHuoLongHeaterAttributes extends ChipManager {
     function GetInternalChipName() { return "weapon_primary_apply_huo_long_heater_attributes"; }
-    function GetChipDescription() { return "Apply Huo-Long Heater Effect (Additional chip ignites enemy On hit)"; }
+    function GetChipDescription()  { return "Apply Huo-Long Heater Effect (Additional chip ignites enemy On hit)"; }
 
     constructor() {
         base.constructor(2);
