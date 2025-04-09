@@ -57,6 +57,7 @@ class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
                 break;
 
             case Constants.ETFClass.TF_CLASS_PYRO:
+            case Constants.ETFClass.TF_CLASS_DEMOMAN:
                 player.AddCustomAttribute("max health additive bonus", 225 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
@@ -148,7 +149,6 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
             case "tf_weapon_scattergun":
             case "tf_weapon_flamethrower":
             case "tf_weapon_flaregun":
-            // case "tf_weapon_grenadelauncher":
             // case "tf_weapon_minigun":
             // case "tf_weapon_shotgun_primary":
             // case "tf_weapon_syringegun_medic":
@@ -157,9 +157,13 @@ class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipMa
                 weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
 
+            // The following weapons have their damage bonus nerfed
             case "tf_weapon_rocketlauncher":
-                // Nerf the damage bonus
                 weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
+                break;
+            case "tf_weapon_grenadelauncher":
+            case "tf_weapon_pipebomblauncher":
+                weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
     }
@@ -178,6 +182,8 @@ class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyC
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_flaregun":
+            case "tf_weapon_grenadelauncher":
+            case "tf_weapon_pipebomblauncher":
                 weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -197,6 +203,8 @@ class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChi
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_flaregun":
+            case "tf_weapon_grenadelauncher":
+            case "tf_weapon_pipebomblauncher":
                 weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
         }
@@ -216,7 +224,12 @@ class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipM
             case "tf_weapon_scattergun":
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_flamethrower":
+            case "tf_weapon_grenadelauncher":
                 weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
+            case "tf_weapon_pipebomblauncher":
+                weapon.AddAttribute("maxammo secondary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
             // Unlike other weapons, we are going to dramatically increase the max ammo allowed for the Scorch Shot.
@@ -232,16 +245,20 @@ class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChip
     function GetChipDescription()  { return "Increase clip size of primary/secondary weapon"; }
 
     constructor(/*Integer*/ max_team_size) {
-        base.constructor(max_team_size, 5);
+        base.constructor(max_team_size, 4);
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
+            case "tf_weapon_pipebomblauncher":
                 weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
                 break;
+
             case "tf_weapon_rocketlauncher":
+            case "tf_weapon_grenadelauncher":
                 weapon.AddAttribute("clip size upgrade atomic", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER)
+                break;
         }
     }
 }
@@ -255,13 +272,8 @@ class ChipManager_WeaponMeleeDamageIncrease extends TeamPenaltyChipManager {
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
-        switch (weapon.GetClassname()) {
-            case "tf_weapon_bat":
-            case "tf_weapon_bat_wood":
-            case "tf_weapon_shovel":
-            case "tf_weapon_fireaxe":
-                weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
-                break;
+        if (weapon_type == CustomLoadoutWeaponType.MELEE) {
+            weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER)
         }
     }
 }
@@ -401,6 +413,27 @@ class ChipManager_WeaponMeleeCauseMarkForDeath extends ChipManager {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
                 weapon.AddAttribute("mark for death", 1, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeMinicritsOnKill extends ChipManager {
+    function GetInternalChipName() { return "weapon_melee_minicrits_on_kill"; }
+    function GetChipDescription()  { return "Gain mini-crits on melee kill (additional chips increate duration)"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count < 1) {
+            return;
+        }
+
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_bottle":
+            case "tf_weapon_sword":
+                weapon.AddAttribute("minicritboost on kill", (5 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }
@@ -571,6 +604,65 @@ class ChipManager_WeaponMeleeIgniteOnHit extends ChipManager {
             case "tf_weapon_fireaxe":
                 if (chip_count > 0) { weapon.AddAttribute("Set DamageType Ignite", 1, ATTRIBUTE_DURATION_FOREVER); }
                 if (chip_count > 1) { weapon.AddAttribute("minicrit vs burning player", 1, ATTRIBUTE_DURATION_FOREVER); }
+        }
+    }
+}
+
+//
+// Demo Only
+//
+
+class ChipManager_WeaponReplacementDemomanScotsmansSkullcutter extends ChipManager {
+    function GetInternalChipName() { return "weapon_replacement_demoman_scotsmans_skullcutter"; }
+    function GetChipDescription()  { return "Unlock the Scotsman's Skullcutter"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ReplaceWeaponInCustomLoadout(/*CustomLoadout*/ loadout) {
+        if (chip_count > 0) {
+            // Destroy previous weapon
+            loadout.melee_weapon.Destroy();
+            // Add new weapon
+            loadout.melee_weapon = CreateWeaponGeneric("tf_weapon_sword", 172);
+            // Undo Scotsman's Skullcutter nerf
+            loadout.melee_weapon.AddAttribute("move speed penalty", 1.0, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponSecondaryReduceChargeTime extends ChipManager {
+    function GetInternalChipName() { return "weapon_secondary_reduce_charge_time"; }
+    function GetChipDescription() { return "Reduce charge time of secondary"; }
+
+    constructor() {
+        base.constructor(4);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_pipebomblauncher":
+                weapon.AddAttribute("stickybomb charge rate", 1.0 - (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponSecondaryIncreaseMaxStickybombsOut extends ChipManager {
+    function GetInternalChipName() { return "weapon_secondary_increase_max_stickybombs_out"; }
+    function GetChipDescription() { return "Increase number of stickybombs out of the field"; }
+
+    constructor() {
+        base.constructor(4);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_pipebomblauncher":
+                // Apply Nerf
+                weapon.AddAttribute("max pipebombs decreased", -4, ATTRIBUTE_DURATION_FOREVER);
+                // Then Buff
+                weapon.AddAttribute("max pipebombs increased", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }

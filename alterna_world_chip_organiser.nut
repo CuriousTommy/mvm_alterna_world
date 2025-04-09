@@ -70,10 +70,14 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
 
 
     local demoman_only_chips_shared = {};
+    Private_AssignChipToTable(demoman_only_chips_shared, ChipManager_WeaponMeleeMinicritsOnKill());
+    Private_AssignChipToTable(demoman_only_chips_shared, ChipManager_WeaponReplacementDemomanScotsmansSkullcutter());
     local demoman_only_chips_defaultloadout = {};
     Private_AssignAllChipsToTable(demoman_only_chips_shared, demoman_only_chips_defaultloadout);
     local demoman_only_chips_pipebomb = {};
     Private_AssignAllChipsToTable(demoman_only_chips_shared, demoman_only_chips_pipebomb);
+    Private_AssignChipToTable(demoman_only_chips_pipebomb, ChipManager_WeaponSecondaryReduceChargeTime());
+    Private_AssignChipToTable(demoman_only_chips_pipebomb, ChipManager_WeaponSecondaryIncreaseMaxStickybombsOut());
 
 
     local heavyweapons_only_chips_defaultloadout = {};
