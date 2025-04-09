@@ -299,10 +299,6 @@ class ChipManager_WeaponMeleeAttackSpeedIncrease extends TeamPenaltyChipManager 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (weapon_type == CustomLoadoutWeaponType.MELEE) {
             switch (weapon.GetClassname()) {
-                case "tf_weapon_shovel":
-                    weapon.AddAttribute("melee attack rate bonus", 1.0 - (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                    break;
-
                 default:
                     weapon.AddAttribute("melee attack rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                     break;
@@ -534,7 +530,7 @@ class ChipManager_WeaponReplacementSoldierDisciplinaryAction extends ChipManager
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (chip_count > 1 && weapon.GetClassname() == "tf_weapon_shovel") {
-            weapon.AddAttribute("speed_boost_on_hit_enemy", 1, ATTRIBUTE_DURATION_FOREVER);
+            weapon.AddAttribute("speed_boost_on_hit", 5, ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }
