@@ -60,6 +60,16 @@ class ChatCommandManager {
         }
     }
 
+    function Private_ActivePostInventoryApplicationForPlayer(/*CTFPlayer*/ player) {
+        // Apply chip upgrades to player
+        EntFireByHandle(player, "CallScriptFunction", "PostPlayerSpawn", 0, null, null);
+
+        // Recreate weapon and apply chip upgrades to weapons
+        local player_manager = Entities.FindByClassname(null, "tf_player_manager")
+        local iuserid = NetProps.GetPropIntArray(player_manager, "m_iUserID", player.entindex())
+        SendGlobalGameEvent("post_inventory_application", { userid = iuserid });
+    }
+
     function DebugAddChip(/*CTFPlayer*/ player, /*List<String>*/ command_args) {
         if (command_args.len() < 2) {
             PrintToChatWindow(player, "Not enough arguments for !debugaddchip");
@@ -84,8 +94,7 @@ class ChatCommandManager {
         chip.IncrementChip();
 
         // Recreate weapon and apply chip upgrades to weapons/player
-        player_inventory.ReapplyWeaponsToPlayer(player);
-        player_inventory.ApplyChipsUpgradesToPlayer(player);
+        Private_ActivePostInventoryApplicationForPlayer(player);
     }
 
     function DebugMaxOutAllChips(/*CTFPlayer*/ player) {
@@ -102,8 +111,7 @@ class ChatCommandManager {
         }
 
         // Recreate weapon and apply chip upgrades to weapons/player
-        player_inventory.ReapplyWeaponsToPlayer(player);
-        player_inventory.ApplyChipsUpgradesToPlayer(player);
+        Private_ActivePostInventoryApplicationForPlayer(player);
     }
 
     function DebugCycleLoadout(/*CTFPlayer*/ player) {
@@ -115,8 +123,7 @@ class ChatCommandManager {
         local player_inventory = global_values.GetPlayerInventory(player);
         if (player_inventory.CycleLoadout(player)) {
             // Recreate weapon and apply chip upgrades to weapons/player
-            player_inventory.ReapplyWeaponsToPlayer(player);
-            player_inventory.ApplyChipsUpgradesToPlayer(player);
+            Private_ActivePostInventoryApplicationForPlayer(player);
         }
     }
 }
