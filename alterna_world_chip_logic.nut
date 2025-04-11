@@ -4,10 +4,9 @@
 // https://wiki.teamfortress.com/wiki/List_of_item_attributes
 
 IncludeScript("alterna_world_chip.nut");
+IncludeScript("alterna_world_constants.nut");
 IncludeScript("alterna_world_misc.nut")
 IncludeScript("alterna_world_weapon.nut");
-
-const ATTRIBUTE_DURATION_FOREVER = -1;
 
 //
 // Debug/Proof Of Concept Chip
@@ -38,9 +37,9 @@ class ChipManager_DebugApplyProofOfConcept extends ChipManager {
 // Common Chips (Team Based)
 //
 
-class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
-    function GetInternalChipName() { return "player_max_health"; }
-    function GetChipDescription()  { return "Increase the max health"; }
+class ChipManager_PlayerBuildingMaxHealth extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "player_building_max_health"; }
+    function GetChipDescription()  { return "Increase the max health of a player & building"; }
 
     constructor(/*Integer*/ max_team_size) {
         base.constructor(max_team_size, 5);
@@ -49,6 +48,7 @@ class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
     function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
         switch (player.GetPlayerClass()) {
             case Constants.ETFClass.TF_CLASS_SCOUT:
+            case Constants.ETFClass.TF_CLASS_ENGINEER:
                 player.AddCustomAttribute("max health additive bonus", 175 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
@@ -67,6 +67,14 @@ class ChipManager_PlayerMaxHealth extends TeamPenaltyChipManager {
 
             default:
                 player.AddCustomAttribute("max health additive bonus", 1000, ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_pda_engineer_build":
+                weapon.AddAttribute("engy building health bonus", 1.0 + (5.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
     }
@@ -140,39 +148,41 @@ class ChipManager_PlayerJumpHeight extends TeamPenaltyChipManager {
     }
 }
 
-class ChipManager_WeaponPrimarySecondaryDamageIncrease extends TeamPenaltyChipManager {
-    function GetInternalChipName() { return "weapon_primary_secondary_damage_increase"; }
-    function GetChipDescription()  { return "Increase damage of primary/secondary weapon"; }
+class ChipManager_WeaponPrimarySecondaryBuildingDamageIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_building_damage_increase"; }
+    function GetChipDescription()  { return "Increase damage of primary/secondary weapon & sentry"; }
 
     constructor(/*Integer*/ max_team_size) {
         base.constructor(max_team_size, 5);
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
-        switch (weapon.GetClassname()) {
-            case "tf_weapon_scattergun":
-            case "tf_weapon_flamethrower":
-            case "tf_weapon_flaregun":
-            // case "tf_weapon_shotgun_primary":
-            // case "tf_weapon_syringegun_medic":
-            // case "tf_weapon_sniperrifle":
-            // case "tf_weapon_revolver":
-                weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+        if (weapon_type == CustomLoadoutWeaponType.PRIMARY || weapon_type == CustomLoadoutWeaponType.SECONDARY || weapon_type == CustomLoadoutWeaponType.PDA1) {
+            switch (weapon.GetClassname()) {
+                // The following weapons have their damage bonus nerfed
+                case "tf_weapon_rocketlauncher":
+                    weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+                case "tf_weapon_grenadelauncher":
+                case "tf_weapon_pipebomblauncher":
+                    weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
 
-            // The following weapons have their damage bonus nerfed
-            case "tf_weapon_rocketlauncher":
-                weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
-            case "tf_weapon_grenadelauncher":
-            case "tf_weapon_pipebomblauncher":
-                weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+                // Technically not a nerf, but I don't want Heavy's minigun to be too overpowered...
+                case "tf_weapon_minigun":
+                    weapon.AddAttribute("damage bonus", 1.0 + (0.2 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
 
-            // Technically not a nerf, but I don't want Heavy's minigun to be too overpowered...
-            case "tf_weapon_minigun":
-                weapon.AddAttribute("damage bonus", 1.0 + (0.2 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+                // Sentry requires different attribute + don't want to buff damage too much
+                case "tf_weapon_pda_engineer_build":
+                    weapon.AddAttribute("engy sentry damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+
+                // Otherwise all Primary & Secondary weapons have the usual up to %100 increase
+                default:
+                    weapon.AddAttribute("damage bonus", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
         }
     }
 }
@@ -186,66 +196,82 @@ class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyC
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
-        switch (weapon.GetClassname()) {
-            case "tf_weapon_scattergun":
-            case "tf_weapon_rocketlauncher":
-            case "tf_weapon_flaregun":
-            case "tf_weapon_grenadelauncher":
-            case "tf_weapon_pipebomblauncher":
-                weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+        if (weapon_type == CustomLoadoutWeaponType.PRIMARY || weapon_type == CustomLoadoutWeaponType.SECONDARY) {
+            switch (weapon.GetClassname()) {
+                // These weapons don't require reloading, so it doesn't make sense to include the upgrade
+                case "tf_weapon_flamethrower":
+                case "tf_weapon_minigun":
+                    break;
+
+                // Otherwise apply faster reload speed
+                default:
+                    weapon.AddAttribute("faster reload rate", 1.0 - (0.6 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
         }
     }
 }
 
-class ChipManager_WeaponPrimarySecondaryFireSpeedIncrease extends TeamPenaltyChipManager {
-    function GetInternalChipName() { return "weapon_primary_secondary_fire_speed"; }
-    function GetChipDescription()  { return "Increase fire speed of primary/secondary weapon"; }
+class ChipManager_WeaponPrimarySecondaryBuildingFireSpeedIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_building_fire_speed"; }
+    function GetChipDescription()  { return "Increase fire speed of primary/secondary weapon & sentry"; }
 
     constructor(/*Integer*/ max_team_size) {
         base.constructor(max_team_size, 5);
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
-        switch (weapon.GetClassname()) {
-            case "tf_weapon_scattergun":
-            case "tf_weapon_rocketlauncher":
-            case "tf_weapon_flaregun":
-            case "tf_weapon_grenadelauncher":
-            case "tf_weapon_pipebomblauncher":
-            case "tf_weapon_minigun":
-                weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+        if (weapon_type == CustomLoadoutWeaponType.PRIMARY || weapon_type == CustomLoadoutWeaponType.SECONDARY || weapon_type == CustomLoadoutWeaponType.PDA1) {
+            switch (weapon.GetClassname()) {
+                // Increasing sentry fire speed requires a different attribute
+                case "tf_weapon_pda_engineer_build":
+                    weapon.AddAttribute("engy sentry fire rate increased", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+
+                // Other weapons use the normal attribute
+                default:
+                    weapon.AddAttribute("fire rate bonus", 1.0 - (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
         }
     }
 }
 
-class ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease extends TeamPenaltyChipManager {
-    function GetInternalChipName() { return "weapon_primary_secondary_max_ammo"; }
-    function GetChipDescription()  { return "Increase max ammo of primary/secondary weapon"; }
+class ChipManager_WeaponPrimarySecondaryMaxAmmoMetalIncrease extends TeamPenaltyChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_metal_max_ammo"; }
+    function GetChipDescription()  { return "Increase max ammo of primary/secondary weapon & metal"; }
 
     constructor(/*Integer*/ max_team_size) {
         base.constructor(max_team_size, 5);
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
-        switch (weapon.GetClassname()) {
-            case "tf_weapon_scattergun":
-            case "tf_weapon_rocketlauncher":
-            case "tf_weapon_flamethrower":
-            case "tf_weapon_grenadelauncher":
-            case "tf_weapon_minigun":
-                weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+        if (weapon_type == CustomLoadoutWeaponType.PRIMARY) {
+            switch (weapon.GetClassname()) {
+                default:
+                    weapon.AddAttribute("maxammo primary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
 
-            case "tf_weapon_pipebomblauncher":
-                weapon.AddAttribute("maxammo secondary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+        } else if (weapon_type == CustomLoadoutWeaponType.SECONDARY) {
+            switch (weapon.GetClassname()) {
+                // The following weapons will have a bigger increase of max ammo
+                case "tf_weapon_flaregun":
+                    weapon.AddAttribute("maxammo secondary increased", 1.0 + (5.25 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
 
-            // Unlike other weapons, we are going to dramatically increase the max ammo allowed for the Scorch Shot.
-            case "tf_weapon_flaregun":
-                weapon.AddAttribute("maxammo secondary increased", 1.0 + (5.25 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
-                break;
+                // Otherwise stick with the default max ammo
+                default:
+                    weapon.AddAttribute("maxammo secondary increased", 1.0 + (1.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
+
+        } else if (weapon_type == CustomLoadoutWeaponType.PDA1) {
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_pda_engineer_build":
+                    weapon.AddAttribute("maxammo metal increased", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
         }
     }
 }
@@ -262,6 +288,8 @@ class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChip
         switch (weapon.GetClassname()) {
             case "tf_weapon_scattergun":
             case "tf_weapon_pipebomblauncher":
+            case "tf_weapon_shotgun_primary":
+            case "tf_weapon_sentry_revenge":
                 weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
@@ -396,6 +424,7 @@ class ChipManager_WeaponMeleeCauseBleeding extends ChipManager {
         switch (weapon.GetClassname()) {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
+            case "tf_weapon_wrench":
                 weapon.AddAttribute("bleeding duration", (15 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
@@ -743,6 +772,111 @@ class ChipManager_WeaponMeleeSpeedBoostOnHit extends ChipManager {
         switch (weapon.GetClassname()) {
             case "tf_weapon_fists":
                 weapon.AddAttribute("speed_boost_on_hit", 5, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+//
+// Engineer Only
+//
+
+class ChipManager_WeaponReplacementEngineerFrontierJustice extends ChipManager {
+    function GetInternalChipName() { return "weapon_replacement_engineer_frontier_justice"; }
+    function GetChipDescription()  { return "Unlock the Frontier Justice (only mini-crits)"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ReplaceWeaponInCustomLoadout(/*CustomLoadout*/ loadout) {
+        if (chip_count > 0) {
+            // Destroy previous weapon
+            loadout.primary_weapon.Destroy();
+            // Add new weapon
+            loadout.primary_weapon = CreateWeaponGeneric("tf_weapon_sentry_revenge", 141);
+            // Undo Frontier Justice nerf
+            loadout.primary_weapon.AddAttribute("clip size penalty", 1.0, ATTRIBUTE_DURATION_FOREVER);
+
+
+        }
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (weapon.GetClassname() == "tf_weapon_sentry_revenge") {
+            // Apply crits nerf
+            weapon.AddAttribute("crits_become_minicrits", 1, ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponPrimaryPickupWeaponsFromADistance extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_pickup_weapons_from_a_distance"; }
+    function GetChipDescription()  { return "Enable picking up buildings from a distance"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count > 0) {
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_shotgun_primary":
+                case "tf_weapon_sentry_revenge":
+                    weapon.AddAttribute("engineer building teleporting pickup", 50, ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
+        }
+    }
+}
+
+class ChipManager_WeaponPda1IncreaseNumberOfDisposableSentries extends ChipManager {
+    function GetInternalChipName() { return "weapon_pda1_increase_number_of_disposable_sentries"; }
+    function GetChipDescription()  { return "Increase number of disposable sentries"; }
+
+    constructor() {
+        base.constructor(3);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_pda_engineer_build":
+                weapon.AddAttribute("engy disposable sentries", chip_count, ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponPda1IncreaseSentryAndDispensorRange extends ChipManager {
+    function GetInternalChipName() { return "weapon_pda1_increase_sentry_and_dispensor_range"; }
+    function GetChipDescription()  { return "Increase the range for sentry & dispensor"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_pda_engineer_build":
+                weapon.AddAttribute("engy sentry radius increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                weapon.AddAttribute("engy dispenser radius increased", 1.0 + (10.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponPda1FasterSentryDeploy extends ChipManager {
+    function GetInternalChipName() { return "weapon_pda1_faster_sentry_deploy"; }
+    function GetChipDescription()  { return "Deploy newly built sentry faster"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_pda_engineer_build":
+                weapon.AddAttribute("engineer sentry build rate multiplier", 1.0 + (2.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                break;
         }
     }
 }

@@ -1,5 +1,6 @@
 // This file will handle forcing a list of approved weapons onto the player
 
+IncludeScript("alterna_world_constants.nut");
 IncludeScript("alterna_world_misc.nut");
 
 enum CustomLoadoutWeaponType {
@@ -252,7 +253,8 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
 
 
     local engineer_loadout_default = function() {
-        return CustomLoadout(
+        // Create weapons
+        local loadouts = CustomLoadout(
             CreateWeaponGeneric("tf_weapon_shotgun_primary", 9),
             null,
             CreateWeaponGeneric("tf_weapon_pda_engineer_build", 25),
@@ -260,6 +262,11 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
             Private_CreateWeaponTfWeaponBuilder("tf_weapon_builder", 28, Constants.ETFClass.TF_CLASS_ENGINEER),
             CreateWeaponGeneric("tf_weapon_wrench", 7)
         );
+
+        // Apply default weapon attributes that we don't plan to change
+        loadouts.melee_weapon.AddAttribute("mod wrench builds minisentry", 1, ATTRIBUTE_DURATION_FOREVER);
+
+        return loadouts;
     }
     local approved_engineer_loadouts = [
         engineer_loadout_default

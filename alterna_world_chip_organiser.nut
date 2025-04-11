@@ -17,14 +17,14 @@ function Private_CreateSharedChipForTeam(/*Integer*/ max_team_size) /*-> Table<S
     // For testing only
     // Private_AssignChipToTable(shared_chips_for_team, ChipManager_DebugApplyProofOfConcept());
 
-    Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerMaxHealth(max_team_size));
+    Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerBuildingMaxHealth(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerAmmoMetalRegen(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerMovementSpeed(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_PlayerJumpHeight(max_team_size));
-    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryDamageIncrease(max_team_size));
+    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryBuildingDamageIncrease(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease(max_team_size));
-    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryFireSpeedIncrease(max_team_size));
-    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryMaxAmmoIncrease(max_team_size));
+    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryBuildingFireSpeedIncrease(max_team_size));
+    Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryMaxAmmoMetalIncrease(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponPrimarySecondaryClipSizeIncrease(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponMeleeDamageIncrease(max_team_size));
     Private_AssignChipToTable(shared_chips_for_team, ChipManager_WeaponMeleeAttackSpeedIncrease(max_team_size));
@@ -88,7 +88,12 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
     Private_AssignChipToTable(heavyweapons_only_chips_defaultloadout, ChipManager_WeaponMeleeSpeedBoostOnHit());
 
     local engineer_only_chips_defaultloadout = {};
-
+    Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponReplacementEngineerFrontierJustice());
+    Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponPrimaryPickupWeaponsFromADistance());
+    Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponPda1IncreaseNumberOfDisposableSentries());
+    Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponPda1IncreaseSentryAndDispensorRange());
+    Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponPda1FasterSentryDeploy());
+    Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponMeleeCauseBleeding());
 
     local medic_only_chips_shared = {};
     local medic_only_chips_defaultloadout = {};
