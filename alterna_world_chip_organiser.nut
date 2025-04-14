@@ -96,8 +96,12 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
     Private_AssignChipToTable(engineer_only_chips_defaultloadout, ChipManager_WeaponMeleeCauseBleeding());
 
     local medic_only_chips_shared = {};
+    Private_AssignChipToTable(medic_only_chips_shared, ChipManager_WeaponMeleeCauseBleeding());
+    Private_AssignChipToTable(medic_only_chips_shared, ChipManager_WeaponMeleeVictimLosesMedigunChargeOnHit());
+    Private_AssignChipToTable(medic_only_chips_shared, ChipManager_WeaponMeleeHitAllPlayerConnectedWithMedigun());
     local medic_only_chips_defaultloadout = {};
     Private_AssignAllChipsToTable(medic_only_chips_shared, medic_only_chips_defaultloadout);
+    Private_AssignChipToTable(medic_only_chips_defaultloadout, ChipManager_WeaponPrimaryMadMilk());
     local medic_only_chips_crossbow = {};
     Private_AssignAllChipsToTable(medic_only_chips_shared, medic_only_chips_crossbow);
 

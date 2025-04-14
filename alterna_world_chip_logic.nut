@@ -65,6 +65,10 @@ class ChipManager_PlayerBuildingMaxHealth extends TeamPenaltyChipManager {
                 player.AddCustomAttribute("max health additive bonus", 300 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
+            case Constants.ETFClass.TF_CLASS_MEDIC:
+                player.AddCustomAttribute("max health additive bonus", 200 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
+                break;
+
             default:
                 player.AddCustomAttribute("max health additive bonus", 1000, ATTRIBUTE_DURATION_FOREVER);
                 break;
@@ -168,9 +172,12 @@ class ChipManager_WeaponPrimarySecondaryBuildingDamageIncrease extends TeamPenal
                     weapon.AddAttribute("damage bonus", 1.0 + (0.4 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                     break;
 
-                // Technically not a nerf, but I don't want Heavy's minigun to be too overpowered...
+                // The damage bonus for the following weapons are technically not a nerf, but I don't want them to be too strong...
                 case "tf_weapon_minigun":
                     weapon.AddAttribute("damage bonus", 1.0 + (0.2 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+                case "tf_weapon_crossbow":
+                    weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                     break;
 
                 // Sentry requires different attribute + don't want to buff damage too much
@@ -202,6 +209,11 @@ class ChipManager_WeaponPrimarySecondaryReloadSpeedIncrease extends TeamPenaltyC
                 case "tf_weapon_flamethrower":
                 case "tf_weapon_minigun":
                     break;
+
+                // Crossbow needs a reload buff
+                case "tf_weapon_crossbow":
+                    weapon.AddAttribute("faster reload rate", 1.0 - (0.8 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break
 
                 // Otherwise apply faster reload speed
                 default:
@@ -290,11 +302,13 @@ class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChip
             case "tf_weapon_pipebomblauncher":
             case "tf_weapon_shotgun_primary":
             case "tf_weapon_sentry_revenge":
+            case "tf_weapon_syringegun_medic":
                 weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
             case "tf_weapon_rocketlauncher":
             case "tf_weapon_grenadelauncher":
+            case "tf_weapon_crossbow":
                 weapon.AddAttribute("clip size upgrade atomic", (8 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
@@ -425,6 +439,7 @@ class ChipManager_WeaponMeleeCauseBleeding extends ChipManager {
             case "tf_weapon_bat":
             case "tf_weapon_bat_wood":
             case "tf_weapon_wrench":
+            case "tf_weapon_bonesaw":
                 weapon.AddAttribute("bleeding duration", (15 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
@@ -877,6 +892,65 @@ class ChipManager_WeaponPda1FasterSentryDeploy extends ChipManager {
             case "tf_weapon_pda_engineer_build":
                 weapon.AddAttribute("engineer sentry build rate multiplier", 1.0 + (2.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
+        }
+    }
+}
+
+//
+// Medic Only
+//
+
+class ChipManager_WeaponPrimaryMadMilk extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_mad_milk"; }
+    function GetChipDescription()  { return "Primary weapon applies mad milk on hit"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count > 0) {
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_syringegun_medic":
+                    weapon.AddAttribute("mad milk syringes", 1, ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeVictimLosesMedigunChargeOnHit extends ChipManager  {
+    function GetInternalChipName() { return "weapon_melee_victim_loses_medigun_charge_on_hit"; }
+    function GetChipDescription()  { return "Melee weapon reduces victim's medigun charge on hit"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_bonesaw":
+                weapon.AddAttribute("subtract victim medigun charge on hit", (25 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
+                break;
+        }
+    }
+}
+
+class ChipManager_WeaponMeleeHitAllPlayerConnectedWithMedigun extends ChipManager  {
+    function GetInternalChipName() { return "weapon_melee_hit_all_players_connected_with_medigun"; }
+    function GetChipDescription()  { return "For Melee weapon, all players connected via Medigun beams are hit"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count > 0) {
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_bonesaw":
+                    weapon.AddAttribute("damage all connected", 1, ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
         }
     }
 }
