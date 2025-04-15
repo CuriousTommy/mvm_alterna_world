@@ -292,16 +292,19 @@ function GenerateDefaultApprovedWeapons() /*-> Table<Constants.ETFTeam,List<Func
 
 
     local sniper_loadout_default = function() {
-        return CreateCustomLoadoutPrimaryAndMelee(
-            CreateWeaponGeneric("tf_weapon_sniperrifle", 14),
+        return CreateCustomLoadoutSecondaryAndMelee(
+            CreateWeaponGeneric("tf_weapon_smg", 16),
             CreateWeaponGeneric("tf_weapon_club", 3)
         );
     }
     local sniper_loadout_huntsman = function() {
-        return CreateCustomLoadoutPrimaryAndMelee(
+        local loadout = CreateCustomLoadoutPrimaryAndMelee(
             CreateWeaponGeneric("tf_weapon_compound_bow", 56),
             CreateWeaponGeneric("tf_weapon_club", 3)
         );
+
+        loadout.primary_weapon.AddAttribute("crits_become_minicrits", 1, ATTRIBUTE_DURATION_FOREVER);
+        return loadout;
     }
     local approved_sniper_loadouts = [
         sniper_loadout_default,

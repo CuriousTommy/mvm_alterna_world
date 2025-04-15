@@ -107,10 +107,16 @@ function CreatePlayerChip() /*-> Table<Constants.ETFClass,List<Table<String,Chip
 
 
     local sniper_only_chips_shared = {};
+    Private_AssignChipToTable(sniper_only_chips_shared, ChipManager_WeaponMeleeCauseBleeding());
+    Private_AssignChipToTable(sniper_only_chips_shared, ChipManager_WeaponMeleeMinicritsOnKill());
     local sniper_only_chips_defaultloadout = {};
     Private_AssignAllChipsToTable(sniper_only_chips_shared, sniper_only_chips_defaultloadout);
+    Private_AssignChipToTable(sniper_only_chips_defaultloadout, ChipManager_WeaponPrimarySecondaryDecreaseBulletSpread());
+    Private_AssignChipToTable(sniper_only_chips_defaultloadout, ChipManager_WeaponSecondaryCritsOnHeadshot());
     local sniper_only_chips_huntsman = {};
     Private_AssignAllChipsToTable(sniper_only_chips_shared, sniper_only_chips_huntsman);
+    Private_AssignChipToTable(sniper_only_chips_huntsman, ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration());
+    Private_AssignChipToTable(sniper_only_chips_huntsman, ChipManager_WeaponPrimarySecondaryCauseBleedingOnHit());
 
 
     local spy_only_chips_defaultloadout = {};

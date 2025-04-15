@@ -47,6 +47,7 @@ class ChipManager_PlayerBuildingMaxHealth extends TeamPenaltyChipManager {
 
     function ApplyAttributeToPlayer(/*CTFPlayer*/ player) {
         switch (player.GetPlayerClass()) {
+            case Constants.ETFClass.TF_CLASS_SNIPER:
             case Constants.ETFClass.TF_CLASS_SCOUT:
             case Constants.ETFClass.TF_CLASS_ENGINEER:
                 player.AddCustomAttribute("max health additive bonus", 175 * CalculatePercentage(), ATTRIBUTE_DURATION_FOREVER);
@@ -163,6 +164,11 @@ class ChipManager_WeaponPrimarySecondaryBuildingDamageIncrease extends TeamPenal
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
         if (weapon_type == CustomLoadoutWeaponType.PRIMARY || weapon_type == CustomLoadoutWeaponType.SECONDARY || weapon_type == CustomLoadoutWeaponType.PDA1) {
             switch (weapon.GetClassname()) {
+                // Damage increase buff
+                case "tf_weapon_compound_bow":
+                    weapon.AddAttribute("damage bonus", 1.0 + (1.25 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
+
                 // The following weapons have their damage bonus nerfed
                 case "tf_weapon_rocketlauncher":
                     weapon.AddAttribute("damage bonus", 1.0 + (0.5 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
@@ -271,6 +277,9 @@ class ChipManager_WeaponPrimarySecondaryMaxAmmoMetalIncrease extends TeamPenalty
                 case "tf_weapon_flaregun":
                     weapon.AddAttribute("maxammo secondary increased", 1.0 + (5.25 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                     break;
+                case "tf_weapon_smg":
+                    weapon.AddAttribute("maxammo secondary increased", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+                    break;
 
                 // Otherwise stick with the default max ammo
                 default:
@@ -303,6 +312,7 @@ class ChipManager_WeaponPrimarySecondaryClipSizeIncrease extends TeamPenaltyChip
             case "tf_weapon_shotgun_primary":
             case "tf_weapon_sentry_revenge":
             case "tf_weapon_syringegun_medic":
+            case "tf_weapon_smg":
                 weapon.AddAttribute("clip size bonus upgrade", 1.0 + (2.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
 
@@ -394,13 +404,56 @@ class ChipManager_WeaponAnyIncreaseAfterburnDamageAndDuration extends ChipManage
     }
 
     function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count > 0) {
+            // The following non-fire weapons will gain the ability to ignite enemies. Some weapons (like
+            // the fireaxe) will have a seperate upgrade chip.
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_compound_bow":
+                    weapon.AddAttribute("Set DamageType Ignite", 1, ATTRIBUTE_DURATION_FOREVER);
+                    break;
+            }
+        }
+
         switch (weapon.GetClassname()) {
             case "tf_weapon_flamethrower":
             case "tf_weapon_flaregun":
             case "tf_weapon_fireaxe":
+            case "tf_weapon_compound_bow":
                 weapon.AddAttribute("weapon burn dmg increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 weapon.AddAttribute("weapon burn time increased", 1.0 + (1.0 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
                 break;
+        }
+    }
+}
+
+class ChipManager_WeaponPrimarySecondaryDecreaseBulletSpread extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_decrease_bullet_spread"; }
+    function GetChipDescription()  { return "Decrease bullet spread for primary/secondary"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_smg":
+                weapon.AddAttribute("weapon spread bonus", 1.0 - (0.8 * CalculatePercentage()), ATTRIBUTE_DURATION_FOREVER);
+        }
+    }
+}
+
+class ChipManager_WeaponPrimarySecondaryCauseBleedingOnHit extends ChipManager {
+    function GetInternalChipName() { return "weapon_primary_secondary_cause_bleeding_on_hit"; }
+    function GetChipDescription()  { return "Bleeding on hit for primary/secondary"; }
+
+    constructor() {
+        base.constructor(5);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        switch (weapon.GetClassname()) {
+            case "tf_weapon_compound_bow":
+                weapon.AddAttribute("bleeding duration", (15 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
         }
     }
 }
@@ -440,6 +493,7 @@ class ChipManager_WeaponMeleeCauseBleeding extends ChipManager {
             case "tf_weapon_bat_wood":
             case "tf_weapon_wrench":
             case "tf_weapon_bonesaw":
+            case "tf_weapon_club":
                 weapon.AddAttribute("bleeding duration", (15 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
                 break;
         }
@@ -484,6 +538,7 @@ class ChipManager_WeaponMeleeMinicritsOnKill extends ChipManager {
             case "tf_weapon_bottle":
             case "tf_weapon_sword":
             case "tf_weapon_fists":
+            case "tf_weapon_club":
                 weapon.AddAttribute("minicritboost on kill", (5 * CalculatePercentage()).tointeger(), ATTRIBUTE_DURATION_FOREVER);
         }
     }
@@ -950,6 +1005,28 @@ class ChipManager_WeaponMeleeHitAllPlayerConnectedWithMedigun extends ChipManage
                 case "tf_weapon_bonesaw":
                     weapon.AddAttribute("damage all connected", 1, ATTRIBUTE_DURATION_FOREVER);
                     break;
+            }
+        }
+    }
+}
+
+//
+// Sniper only
+//
+
+class ChipManager_WeaponSecondaryCritsOnHeadshot extends ChipManager {
+    function GetInternalChipName() { return "weapon_secondary_crits_on_headshot"; }
+    function GetChipDescription()  { return "Crits on headshot for secondary"; }
+
+    constructor() {
+        base.constructor(1);
+    }
+
+    function ApplyAttributeToWeapon(/*CEconEntity*/ weapon, /*CustomLoadoutWeaponType*/ weapon_type) {
+        if (chip_count > 0) {
+            switch (weapon.GetClassname()) {
+                case "tf_weapon_smg":
+                    weapon.AddAttribute("revolver use hit locations", 1, ATTRIBUTE_DURATION_FOREVER);
             }
         }
     }
